@@ -1,0 +1,10 @@
+[project]
+name = "zen-view"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.0",
+    "networkx>=3.4.2",
+]
