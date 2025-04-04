@@ -1,7 +1,7 @@
 # SimplexTree Visualizer
 
 ## Overview
-Provides a Python API for converting SimplexTrees into interactive 3D visualizations. The project was updated with a more modular, maintainable architecture.
+Provides a Python API for converting SimplexTrees into interactive 3D visualizations. The project was updated with a more modular, maintainable architecture. But, zen-sight is still a work in progress. Currently it depends on a custom implementation of ZenMapper which uses a SimplexTree datastructure -- at some point the main branch of zen mapper will be updated but for now this is just for me.
 
 ## Structure
 
