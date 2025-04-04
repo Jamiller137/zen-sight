@@ -9,67 +9,87 @@ Provides a Python API for converting SimplexTrees into interactive 3D visualizat
 graph TD
     %% Color definitions
     classDef core fill:#1e88e5,color:white,stroke:#0d47a1
-    classDef ui fill:#4caf50,color:white,stroke:#2e7d32
-    classDef models fill:#ff8f00,color:white,stroke:#ef6c00
+    classDef viz fill:#4caf50,color:white,stroke:#2e7d32
     classDef utils fill:#9c27b0,color:white,stroke:#6a1b9a
-    classDef services fill:#ffc107,color:black,stroke:#ff8f00
+    classDef server fill:#ff8f00,color:white,stroke:#ef6c00
+    classDef frontend fill:#ffc107,color:black,stroke:#ff8f00
+    classDef js_models fill:#f44336,color:white,stroke:#d32f2f
 
-    %% Backend
-    A[visualizer.py] --> B[3d_base.html]
-    I[__init__.py] --> A
+    %% Package Structure
+    Init[/__init__.py/] --> Renderer
 
-    %% Core Application
-    B --> W[main.js]
-    W --> C[App.js]
-
-    %% Data Processing
-    C --> M[DataProcessor.js]
-
-    %% Materials
-    M --> MT[Materials.js]
-
-    %% Entity Models
-    subgraph EntityModels ["Object Models"]
-        T[Tetrahedra.js]
-        F[Faces.js]
-        G[Graph.js]
+    %% Core Module
+    subgraph Core [core/]
+        SP[simplex_processor.py]
     end
 
-    M --> T
-    M --> F
-    M --> G
+    %% Visualization Module
+    subgraph Viz [visualization/]
+        Renderer[renderer.py]
+        Materials[materials.py]
+    end
 
-    MT --> T
-    MT --> F
-    MT --> G
+    %% Utils Module
+    subgraph Utils [utils/]
+        Encoders[encoders.py]
+    end
+
+    %% Server Module
+    subgraph Server [server/]
+        FlaskApp[flask_app.py]
+    end
+
+    %% Component relationships
+    Renderer --> SP
+    Renderer --> Materials
+    Renderer --> FlaskApp
+    FlaskApp --> HTML[3d_base.html]
+
+    %% JavaScript Frontend
+    HTML --> Main[main.js]
+    Main --> AppJS[App.js]
+    AppJS --> DP[DataProcessor.js]
+
+    %% JS Models
+    DP --> MatJS[Materials.js]
+    DP --> GraphJS[Graph.js]
+    DP --> FacesJS[Faces.js]
+    DP --> TetraJS[Tetrahedra.js]
+
+    MatJS --> GraphJS
+    MatJS --> FacesJS
+    MatJS --> TetraJS
 
     %% Apply classes
-    class A,B,I core
-    class C,W core
-    class M services
-    class T,F,G models
-    class MT utils
+    class Init,Core,SP core
+    class Viz,Renderer,Materials viz
+    class Utils,Encoders utils
+    class Server,FlaskApp server
+    class HTML,Main,AppJS,DP frontend
+    class MatJS,GraphJS,FacesJS,TetraJS js_models
 
 ```
 
 ## Components
 
-### Python Backend (visualizer.py)
-- `SimplexTreeVisualizer`: Core class that converts simplicial complexes into graph data
-  - Handles data preparation, Flask server management, and HTML rendering Frontend Architecture
+### Python Backend
+- `SimplexTreeVisualizer` (renderer.py) : Core class that converts simplicial complexes into graph data
+    - Orchestrates the visualization pipeline
+    - Delegates materials handling to MaterialManager
+    - Prepares data for rendering
+
+- `MaterialManager` (materials.py) : Manages elements' visual properties
+    - Stores and retrieves properties for elements
+    - Provides defaults when customizations aren't provided
 
 ### Core Application Structure
 - `3d_base.html`: HTML template for the visualization with base structure and JS imports
 - `main.js`: Entry point script that initializes the application
 - `App.js`: Main application component that coordinates all visualization elements
-
-### Data Processing
-- `DataProcessor.js`: Transforms raw data from Python into visualization-ready format
-    - Validates and processes customization options
-    - Applies default values for missing properties
-    - Organizes data for efficient rendering
+- `DataProcessor.js`: Transforms the raw JSON data from Python into proper format
 
 ### Visualization Components
+Served by `flask_app.py`.
 - `Materials.js`: Manages material definitions and properties for all 3D objects
     - Handles color, opacity, wireframe, and other properties
 - `Graph.js`: Handles vertices and edges of the simplicial complex
@@ -130,3 +150,4 @@ visualizer.set_tetrahedron_material(tetra_id, {
 - **Flask** >= 3.1.0: Python web framework for serving the visualization
 - **Jinja2** >= 3.1.6: Template engine for HTML generation
 - **NetworkX** >= 3.4.2: Graph manipulation library
+- numpy
