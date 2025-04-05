@@ -3,6 +3,8 @@ const THREE = window.THREE || {};
 class Materials {
     static createVertexMaterial(options = {}) {
         // Set defaults
+        // There is currently a bug (?) when we set 
+        // the color to 0x000000. Which sets to default.
         const config = {
             color: options?.color || 0x888888,
             opacity: options?.opacity || 1.0,
