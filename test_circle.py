@@ -1,4 +1,3 @@
-from importlib import simple
 from zen_mapper import mapper
 from zen_mapper.cover import Width_Balanced_Cover
 from src.zen_sight import SimplexTreeVisualizer
