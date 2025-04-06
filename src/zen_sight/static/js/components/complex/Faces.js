@@ -8,9 +8,10 @@ class Faces {
     constructor(graphComponent) {
         this.graphComponent = graphComponent;
         this.scene = graphComponent.getScene();
-        this.meshes = [];
+        this.batchedMeshes = []; // Array of meshes, one per material
         this.data = null;
         this.faceData = []; // Store original face data for updates
+        this.materialGroups = []; // Store faces grouped by material
 
         console.log("[Faces] Initialized with scene:", !!this.scene);
     }
@@ -25,45 +26,50 @@ class Faces {
 
     // Update face positions
     update() {
-        if (!this.scene || !this.faceData.length || !this.meshes.length) {
+        if (!this.scene || !this.faceData.length || !this.batchedMeshes.length) {
             return this;
         }
 
-        this.faceData.forEach((face, index) => {
-            if (index >= this.meshes.length) return;
+        try {
+            this.materialGroups.forEach((group, groupIndex) => {
+                if (!this.batchedMeshes[groupIndex]) return;
 
-            const mesh = this.meshes[index];
-            if (!mesh) return;
-
-            try {
                 const positions = [];
 
-                for (let i = 0; i < face.vertices.length; i++) {
-                    const vertexId = face.vertices[i];
-                    const position = this.graphComponent.getNodePosition(vertexId);
+                // vertex positions for all faces in group
+                group.faces.forEach(faceIndex => {
+                    const face = this.faceData[faceIndex];
+                    if (!face || !face.vertices) return;
 
-                    if (position) {
-                        positions.push(position.x, position.y, position.z);
+                    for (let i = 0; i < face.vertices.length; i++) {
+                        const vertexId = face.vertices[i];
+                        const position = this.graphComponent.getNodePosition(vertexId);
+
+                        if (position) {
+                            positions.push(position.x, position.y, position.z);
+                        }
                     }
-                }
+                });
 
-                if (positions.length === 9) { // 3 vertices * 3 coordinates
+                // Update the geometry
+                if (positions.length > 0) {
+                    const mesh = this.batchedMeshes[groupIndex];
                     mesh.geometry.setAttribute('position', 
                         new THREE.Float32BufferAttribute(positions, 3));
                     mesh.geometry.attributes.position.needsUpdate = true;
                     mesh.geometry.computeVertexNormals();
                 }
-            } catch (e) {
-                console.error(```[Faces] Error updating face ${index}:```, e);
-            }
-        });
+            });
+        } catch (e) {
+            console.error("[Faces] Error updating faces:", e);
+        }
 
         return this;
     }
 
     _cleanup() {
-        // Remove all existing meshes and geometries from the scene
-        for (const mesh of this.meshes) {
+        // Remove existing batched meshes
+        for (const mesh of this.batchedMeshes) {
             if (this.scene) {
                 this.scene.remove(mesh);
             }
@@ -73,15 +79,16 @@ class Faces {
             }
 
             if (mesh.material) {
-                if (Array.isArray(mesh.material)) {
-                    mesh.material.forEach(material => material.dispose());
-                } else {
-                    mesh.material.dispose();
-                }
+                mesh.material.dispose();
             }
         }
 
-        this.meshes = [];
+        this.batchedMeshes = [];
+        this.materialGroups = [];
+    }
+
+    _areMaterialsSame(matDataA, matDataB) {
+        return JSON.stringify(matDataA) === JSON.stringify(matDataB);
     }
 
     _renderFaces() {
@@ -99,71 +106,76 @@ class Faces {
         }
 
         console.log("[Faces] Rendering", this.faceData.length, "faces");
-        console.log("[Faces] Sample face:", this.faceData[0]);
 
-        // Process each face
-        this.faceData.forEach((face, index) => {
-            try {
-                // Check if face has vertices array property
-                if (!face.vertices || !Array.isArray(face.vertices)) {
-                    console.error(```[Faces] Face ${index} has no vertices array:```, face);
-                    return;
-                }
+        try {
+            this.faceData.forEach((face, faceIndex) => {
 
-                // Validate we have exactly 3 vertices
-                if (face.vertices.length !== 3) {
-                    console.error(```[Faces] Face ${index} must have exactly 3 vertices, found ${face.vertices.length}:```, face);
-                    return;
-                }
-
-                const faceVertices = [];
-
-                // Get each vertex position
-                for (let i = 0; i < face.vertices.length; i++) {
-                    const vertexId = face.vertices[i];
-
-                    const position = this.graphComponent.getNodePosition(vertexId);
-
-                    if (!position) {
-                        console.error(```[Faces] Position not found for vertex ID ${vertexId} in face ${index}```);
-                        continue;
-                    }
-
-                    faceVertices.push(new THREE.Vector3(position.x, position.y, position.z));
-                }
-
-                // Get material data from face.data.material (processed by DataProcessor)
                 const materialData = face.data?.material || {};
 
-                if (faceVertices.length < 3) {
-                    console.error(```[Faces] Not enough vertices (${faceVertices.length}) for face ${index}```);
-                    return;
+                // Find group or create new one
+                let groupIndex = this.materialGroups.findIndex(group => 
+                    this._areMaterialsSame(group.materialData, materialData));
+
+                if (groupIndex === -1) {
+                    groupIndex = this.materialGroups.length;
+                    this.materialGroups.push({
+                        materialData: materialData,
+                        faces: []
+                    });
                 }
 
-                // Create face geometry
-                const geometry = new THREE.BufferGeometry();
+                // Add face to appropriate material group
+                this.materialGroups[groupIndex].faces.push(faceIndex);
+            });
 
+            console.log(`[Faces] Grouped faces into ${this.materialGroups.length} material groups`);
+
+            // Second pass creates meshess
+            this.materialGroups.forEach((group, groupIndex) => {
                 const positions = [];
-                faceVertices.forEach(v => {
-                    positions.push(v.x, v.y, v.z);
+                let validFaceCount = 0;
+
+                // vertices for this material group
+                group.faces.forEach(faceIndex => {
+                    const face = this.faceData[faceIndex];
+                    let validVertices = 0;
+
+                    for (let i = 0; i < face.vertices.length; i++) {
+                        const vertexId = face.vertices[i];
+                        const position = this.graphComponent.getNodePosition(vertexId);
+
+                        if (position) {
+                            positions.push(position.x, position.y, position.z);
+                            validVertices++;
+                        }
+                    }
+
+                    if (validVertices === 3) {
+                        validFaceCount++;
+                    }
                 });
 
-                geometry.setAttribute('position', 
-                    new THREE.Float32BufferAttribute(positions, 3));
+                if (positions.length > 0) {
 
-                geometry.computeVertexNormals();
+                    const geometry = new THREE.BufferGeometry();
+                    geometry.setAttribute('position', 
+                        new THREE.Float32BufferAttribute(positions, 3));
+                    geometry.computeVertexNormals();
 
-                // Create material and mesh
-                const material = Materials.createFaceMaterial(materialData);
-                const mesh = new THREE.Mesh(geometry, material);
+                    // Create material and mesh
+                    const material = Materials.createFaceMaterial(group.materialData);
+                    const mesh = new THREE.Mesh(geometry, material);
+                    this.scene.add(mesh);
+                    this.batchedMeshes.push(mesh);
 
-                this.scene.add(mesh);
-                this.meshes.push(mesh);
-                console.log(`[Faces] Added face ${index} to scene`);
-            } catch (e) {
-                console.error(`[Faces] Error rendering face ${index}:`, e);
-            }
-        });
+                    console.log(`[Faces] Created batched mesh ${groupIndex} with ${validFaceCount} faces`);
+                }
+            });
+
+            console.log(`[Faces] Added ${this.batchedMeshes.length} batched meshes to scene`);
+        } catch (e) {
+            console.error("[Faces] Error rendering batched faces:", e);
+        }
     }
 }
 
