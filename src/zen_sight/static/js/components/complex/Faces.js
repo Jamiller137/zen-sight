@@ -1,5 +1,5 @@
-// Note: Should probably look into batching together faces into a single 
-// geometry -- would reduce the number of drawing calls.
+// Note: Should eventually optimize memory usage but for now works okay especially when faces are batched.
+// Should also do the same batching to Tetrahedra 
 
 const THREE = window.THREE || {};
 import Materials from './Materials.js';
