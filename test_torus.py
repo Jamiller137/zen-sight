@@ -6,13 +6,20 @@ from zen_mapper.cluster import sk_learn
 import numpy as np
 from matplotlib.pyplot import get_cmap
 
-def create_circle(n_points=1000, noise_level=0.05):
-    angles = 2*np.pi * np.random.rand(n_points)
-    radii = 1 + noise_level*np.random.randn(n_points)
-    x = radii * np.cos(angles)
-    y = radii * np.sin(angles)
-    data = np.column_stack((x,y))
-    return data
+def create_torus(n_points=5000, R=3.0, r=1.0, noise_level=0.05):
+
+    theta = 2 * np.pi * np.random.rand(n_points)
+    phi = 2 * np.pi * np.random.rand(n_points)
+
+    R_noisy = R + noise_level * np.random.randn(n_points)
+    r_noisy = r + noise_level * np.random.randn(n_points)
+
+    x = (R_noisy + r_noisy * np.cos(theta)) * np.cos(phi)
+    y = (R_noisy + r_noisy * np.cos(theta)) * np.sin(phi)
+    z = r_noisy * np.sin(theta)
+
+    torus = np.column_stack((x, y, z))
+    return torus
 
 def value_to_hex_color(value:float, min_val=-1.0, max_val=1.0, colormap='viridis'):
     # written so I can copy paste in other examples
@@ -39,27 +46,27 @@ def value_to_hex_color(value:float, min_val=-1.0, max_val=1.0, colormap='viridis
 
 if __name__ == '__main__':
 
-    dataset = create_circle()
-    coverer = Width_Balanced_Cover(n_elements=5, percent_overlap=0.2)
+    dataset = create_torus()
+    projection = np.column_stack((dataset[:,0], dataset[:,2]))
+    coverer = Width_Balanced_Cover(n_elements=5, percent_overlap=0.3)
 
     result = mapper(
         data=dataset,
-        projection=dataset[:,0],
+        projection=projection,
         cover_scheme=coverer,
-        clusterer=sk_learn(DBSCAN(eps=.1)),
+        clusterer=sk_learn(DBSCAN(eps=.5)),
         min_intersection=1,
-        dim=1
+        dim=2
     )
     nodes = result.nodes
     simplex_tree = result.nerve
-    print(simplex_tree)
-    viz = SimplexTreeVisualizer(simplex_tree, max_dim=1)
-
+    viz = SimplexTreeVisualizer(simplex_tree, max_dim=3)
+    print(dataset[0])
     viz.set_default_materials(
         material_defaults = {
             "vertices": {
                 "color": 0x005ebb, #blue
-                "size": 5,
+                "size": 15,
                 "opacity": 1,
             },
             "edges": {
@@ -82,12 +89,15 @@ if __name__ == '__main__':
         data_indices = nodes[i]
         cluster_data = dataset[data_indices]
         avg_x_value = np.average(cluster_data[:,0])
-        vertex_color = value_to_hex_color(avg_x_value)
+        avg_y_value = np.average(cluster_data[:,1])
+        avg_z_value = np.average(cluster_data[:,2])
+        avg_phi_value = np.arctan2(avg_y_value, avg_x_value)
+        vertex_color = value_to_hex_color(value=avg_z_value, min_val=-1, max_val=1)
         viz.set_vertex_material(
             vertex_id=i,
             material_props={
                 "color": vertex_color,
-                "size": int(5 + len(data_indices)/10),
+                "size": 15
             }
         )
 

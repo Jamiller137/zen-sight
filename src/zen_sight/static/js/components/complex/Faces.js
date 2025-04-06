@@ -1,3 +1,6 @@
+// Note: Should probably look into batching together faces into a single 
+// geometry -- would reduce the number of drawing calls.
+
 const THREE = window.THREE || {};
 import Materials from './Materials.js';
 

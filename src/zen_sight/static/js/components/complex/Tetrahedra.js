@@ -1,4 +1,3 @@
-const THREE = window.THREE || {};
 import Materials from './Materials.js';
 
 class Tetrahedra {

@@ -1,5 +1,3 @@
-const THREE = window.THREE || {};
-
 class Materials {
     static createVertexMaterial(options = {}) {
         // Set defaults
