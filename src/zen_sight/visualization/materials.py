@@ -7,11 +7,11 @@ class MaterialManager:
 
     def __init__(self):
         """Initialize the material manager with empty material dictionaries."""
-        self.vertex_materials = {}      # key by vertex id
-        self.edge_materials = {}        # keyed by pair of vertex ids
-        self.face_materials = {}        # keyed by 3-tuple of vertex ids
-        self.tetrahedron_materials = {} # keyed by 4-tuple of vertex ids
-        self.default_materials = {} 
+        self.vertex_materials = {}  # key by vertex id
+        self.edge_materials = {}  # keyed by pair of vertex ids
+        self.face_materials = {}  # keyed by 3-tuple of vertex ids
+        self.tetrahedron_materials = {}  # keyed by 4-tuple of vertex ids
+        self.default_materials = {}
 
     def set_vertex_material(self, vertex_id, material_props):
         """
@@ -144,12 +144,12 @@ class MaterialManager:
             "vertex": str(vertex),
             "size": default_size,
             "color": int(hash(str(vertex)) % 0xFFFFFF),
-            "tooltip": f"Vertex {vertex}"
+            "tooltip": f"Vertex {vertex}",
         }
 
         # Apply default materials if specified
-        if 'vertices' in self.default_materials:
-            data_props.update(self.default_materials['vertices'])
+        if "vertices" in self.default_materials:
+            data_props.update(self.default_materials["vertices"])
 
         # Override with custom materials
         if vertex in self.vertex_materials:
@@ -160,14 +160,11 @@ class MaterialManager:
     def get_edge_material(self, source_vertex, target_vertex, index):
         """Get material properties for an edge, applying defaults as needed."""
         # Defaults
-        edge_props = {
-            "weight": 1,
-            "color": int(hash(f"edge-{index}") % 0xFFFFFF)
-        }
+        edge_props = {"weight": 1, "color": int(hash(f"edge-{index}") % 0xFFFFFF)}
 
         # Apply default materials
-        if 'edges' in self.default_materials:
-            edge_props.update(self.default_materials['edges'])
+        if "edges" in self.default_materials:
+            edge_props.update(self.default_materials["edges"])
 
         # Apply custom edge materials
         edge_key = (source_vertex, target_vertex)
@@ -182,18 +179,17 @@ class MaterialManager:
 
     def get_face_material(self, vertices, index):
         """Get material properties for a face, applying defaults as needed."""
-        # Default face properties
+        # Default properties
         face_props = {
             "color": int(hash(f"face-{index}") % 0xFFFFFF),
             "opacity": 0.5,
-            "wireframe": False
+            "wireframe": False,
         }
 
-        # Apply default materials
-        if 'faces' in self.default_materials:
-            face_props.update(self.default_materials['faces'])
+        if "faces" in self.default_materials:
+            face_props.update(self.default_materials["faces"])
 
-        # Check and apply custom material properties
+        # Check and apply custom materials
         face_key = tuple(sorted(vertices))
         if face_key in self.face_materials:
             face_props.update(self.face_materials[face_key])
@@ -204,15 +200,16 @@ class MaterialManager:
         """Get material properties for a tetrahedron, applying defaults as needed."""
         # Defaults
         tetra_props = {
-            "color": int(hash(str(index)) % 0xFFFFFF) & 0x7FFFFF | 0x400000,  # Ensure visible color
-            "opacity": 0.6
+            "color": int(hash(str(index)) % 0xFFFFFF) & 0x7FFFFF
+            | 0x400000,  # Ensure visible color
+            "opacity": 0.6,
         }
 
         # Apply user-specified defaults
-        if 'tetrahedra' in self.default_materials:
-            tetra_props.update(self.default_materials['tetrahedra'])
+        if "tetrahedra" in self.default_materials:
+            tetra_props.update(self.default_materials["tetrahedra"])
 
-        # Apply custom materials
+        # apply custom materials
         tetra_key = tuple(sorted(vertices[:4]))
         if tetra_key in self.tetrahedron_materials:
             tetra_props.update(self.tetrahedron_materials[tetra_key])

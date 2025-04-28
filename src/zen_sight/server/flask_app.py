@@ -2,6 +2,7 @@ import json
 from flask import Flask, render_template
 from ..utils.encoders import NumpyEncoder
 
+
 def create_visualization_server(visualization_data):
     """
     Create a Flask server for the 3D visualization.
@@ -16,7 +17,7 @@ def create_visualization_server(visualization_data):
     app : Flask
         Flask application instance
     """
-    app = Flask(__name__, static_folder='../static', template_folder='../templates')
+    app = Flask(__name__, static_folder="../static", template_folder="../templates")
 
     @app.route("/")
     def index():

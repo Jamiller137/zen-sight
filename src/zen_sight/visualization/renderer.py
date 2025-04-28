@@ -8,15 +8,18 @@ from .materials import MaterialManager
 from ..server.flask_app import create_visualization_server
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger('SimplexTreeVisualizer')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("SimplexTreeVisualizer")
+
 
 class SimplexTreeVisualizer:
     """
     Interactive visualization tool for SimplexTree structures.
 
     Converts simplicial complexes into interactive 3D network visualizations.
-    Supports Flask-based interactive visualization.
+    Supports Flask interactive visualization.
 
     Parameters
     ----------
@@ -37,7 +40,7 @@ class SimplexTreeVisualizer:
 
     def set_vertex_material(self, vertex_id, material_props):
         """
-        Set custom material properties for a specific vertex in the visualization.
+        Set custom material properties for a vertex in the visualization.
 
         Parameters
         ----------
@@ -159,8 +162,8 @@ class SimplexTreeVisualizer:
         """
         Set default material properties for all visualization elements.
 
-        Use this method to establish baseline appearance for all vertices, edges, 
-        faces, and tetrahedra in the visualization that don't have specific customizations.
+        Establish baseline appearance for all vertices, edges,
+        faces, and tetrahedra in the visualization.
 
         Parameters
         ----------
@@ -189,7 +192,7 @@ class SimplexTreeVisualizer:
     def _prepare_visualization_data(self):
         """
         Transform simplex tree structure into format compatible with the js frontend.
-        
+
         Notes
         -----
         See `simplex_processor.py`
@@ -227,11 +230,13 @@ class SimplexTreeVisualizer:
 
                 data_props = self.materials.get_vertex_material(vertex, self.node_size)
 
-                vertices.append({
-                    "id": str(node_id),
-                    "position": {"x": x, "y": y, "z": z},
-                    "data": data_props
-                })
+                vertices.append(
+                    {
+                        "id": str(node_id),
+                        "position": {"x": x, "y": y, "z": z},
+                        "data": data_props,
+                    }
+                )
 
         return vertices
 
@@ -246,15 +251,19 @@ class SimplexTreeVisualizer:
                 source_id = str(vertex_ids[source_vertex])
                 target_id = str(vertex_ids[target_vertex])
 
-                edge_props = self.materials.get_edge_material(source_vertex, target_vertex, i)
+                edge_props = self.materials.get_edge_material(
+                    source_vertex, target_vertex, i
+                )
 
                 # Create edge object
-                edge_data.append({
-                    "id": f"edge-{i}",
-                    "source": source_id,
-                    "target": target_id,
-                    "data": edge_props
-                })
+                edge_data.append(
+                    {
+                        "id": f"edge-{i}",
+                        "source": source_id,
+                        "target": target_id,
+                        "data": edge_props,
+                    }
+                )
 
         logger.info(f"Prepared {len(edge_data)} edges for visualization")
         return edge_data
@@ -278,11 +287,9 @@ class SimplexTreeVisualizer:
             if len(vertex_list) == 3:
                 face_props = self.materials.get_face_material(vertices, i)
 
-                faces.append({
-                    "id": f"face-{i}",
-                    "vertices": vertex_list,
-                    "data": face_props
-                })
+                faces.append(
+                    {"id": f"face-{i}", "vertices": vertex_list, "data": face_props}
+                )
 
         logger.info(f"Prepared {len(faces)} faces for visualization")
         return faces
@@ -308,7 +315,7 @@ class SimplexTreeVisualizer:
                 tetra_obj = {
                     "id": f"tetra-{i}",
                     "vertices": [str(vertex_ids[v]) for v in vertices[:4]],
-                    "data": tetra_props
+                    "data": tetra_props,
                 }
                 tetrahedra.append(tetra_obj)
 
@@ -320,7 +327,7 @@ class SimplexTreeVisualizer:
 
         data = self._prepare_visualization_data()
 
-        # Create and run the Flask server
+        # run the Flask server
         app = create_visualization_server(data)
 
         logger.info(f"Starting SimplexTree visualization server on port {port}")

@@ -1,7 +1,8 @@
 import logging
 import networkx as nx
 
-logger = logging.getLogger('SimplexProcessor')
+logger = logging.getLogger("SimplexProcessor")
+
 
 class SimplexProcessor:
     """
@@ -12,7 +13,7 @@ class SimplexProcessor:
     Parameters
     ----------
     simplex_tree : SimplexTree
-        The SimplexTree instance to process. Expected to have methods like
+        The SimplexTree instance to process. Have methods like
         get_simplices(dim) to extract simplices of specific dimensions.
     max_dim : int, optional (default=None)
         Maximum dimension of simplices to process.
@@ -38,7 +39,7 @@ class SimplexProcessor:
         """
         Extract unique vertices from all simplices.
 
-        Collects all vertices appearing in any simplex up to the maximum 
+        Collects all vertices appearing in any simplex up to the maximum
         dimension and creates a mapping of vertex identifiers to sequential indices.
 
 
@@ -62,7 +63,7 @@ class SimplexProcessor:
         -----
         - This should also be able to visualize non-simplicial complexes. However,
         this will mess with the force directed graph since there is no force linking faces and tetrahedra yet.
-        - Should specify visualization properties for problematic faces, edges, and tetraheda. 
+        - Should specify visualization properties for problematic faces, edges, and tetraheda.
         """
         all_simplices = []
         for dim in range(self.max_dim + 1):
@@ -129,10 +130,7 @@ class SimplexProcessor:
         """
         Generate 3D positions for vertices using force-directed layout.
 
-        Uses NetworkX's spring layout algorithm to position vertices in 3D space,
-        creating a visually appealing arrangement that preserves the connectivity
-        structure of the simplicial complex.
-
+        Uses NetworkX's spring layout algorithm to position vertices in 3D space.
         Parameters
         ----------
         graph : networkx.Graph

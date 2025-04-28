@@ -1,16 +1,16 @@
-import App from './App.js';
+import App from "./App.js";
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Loading visualizer...');
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("Loading visualizer...");
 
-    try {
-        // Get the data from the embedded JSON
-        const graphData = JSON.parse(document.getElementById('graph-data').textContent);
+  try {
+    // Get the data from the embedded JSON
+    const graphData = JSON.parse(
+      document.getElementById("graph-data").textContent,
+    );
 
-        // Initialize
-        const app = new App(graphData);
-
-    } catch (error) {
-        console.error("Failed to initialize:", error);
-    }
+    const app = new App(graphData);
+  } catch (error) {
+    console.error("Failed to initialize:", error);
+  }
 });
