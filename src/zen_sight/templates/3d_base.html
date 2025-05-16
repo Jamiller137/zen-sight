@@ -1,27 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/3d_styles.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/3d_styles.css') }}"
+    />
+  </head>
+  <body>
     <div id="graph-container"></div>
     <div class="control-panel">
-        <div id="selection-info">Selected nodes: None</div>
-        <div class="buttons">
-            <button id="btn-add-node" disabled>Add/Remove Node</button>
-            <button id="btn-remove-node" disabled>Add/Remove Node</button>
-            <button id="btn-add-remove-edge" disabled>Add/Remove Edge</button>
-            <button id="btn-add-remove-face" disabled>Add/Remove Face</button>
-            <button id="btn-clear-selection">Clear Selection</button>
-        </div>
+      <div id="selection-info">Selected nodes: None</div>
+      <div class="buttons">
+        <button id="btn-add-node" disabled>Add/Remove Node</button>
+        <button id="btn-remove-node" disabled>Add/Remove Node</button>
+        <button id="btn-add-remove-edge" disabled>Add/Remove Edge</button>
+        <button id="btn-add-remove-face" disabled>Add/Remove Face</button>
+        <button id="btn-clear-selection">Clear Selection</button>
+      </div>
     </div>
 
     <!-- Embed data as JSON -->
     <script id="graph-data" type="application/json" class="hidden">
-        {{ graph_data|safe }}
+      {{ graph_data|safe }}
     </script>
 
     <!-- Load three.js -->
@@ -29,16 +32,37 @@
     <script src="{{ url_for('static', filename='js/lib/3d-force-graph.min.js') }}"></script>
 
     <!-- Load components -->
-    <script type="module" src="{{ url_for('static', filename='js/components/complex/Materials.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/components/complex/Graph.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/components/complex/Faces.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/components/complex/Tetrahedra.js') }}"></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/components/complex/Materials.js') }}"
+    ></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/components/complex/Graph.js') }}"
+    ></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/components/complex/Faces.js') }}"
+    ></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/components/complex/Tetrahedra.js') }}"
+    ></script>
 
     <!-- Load services -->
-    <script type="module" src="{{ url_for('static', filename='js/services/DataProcessor.js') }}"></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/services/DataProcessor.js') }}"
+    ></script>
 
     <!-- Load app-->
-    <script type="module" src="{{ url_for('static', filename='js/App.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/App.js') }}"
+    ></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/main.js') }}"
+    ></script>
+  </body>
 </html>

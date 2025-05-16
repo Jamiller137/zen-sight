@@ -2,11 +2,20 @@ import DataProcessor from "./services/DataProcessor.js";
 import Graph from "./components/complex/Graph.js";
 import Faces from "./components/complex/Faces.js";
 import Tetrahedra from "./components/complex/Tetrahedra.js";
+import SelectionManager from "./components/SelectionManager.js";
 
 class App {
   constructor(data) {
     console.log("Initializing app...");
     this.container = document.getElementById("graph-container");
+    // Initialize the selection manager first!
+    this.selectionManager = new SelectionManager();
+    // Set up selection change listener
+    this.selectionManager.onSelectionChange = (selectedNodes) => {
+      console.log("Selected nodes:", selectedNodes);
+      // add UI updates later
+    };
+
     this.init(data);
 
     // Start the animation loop
@@ -18,6 +27,9 @@ class App {
       // Create graph
       const graphComponent = new Graph(this.container);
       graphComponent.initialize();
+
+      // Connect selection manager to the graph
+      this.selectionManager.setGraph(graphComponent);
 
       this.graphComponent = graphComponent;
 
@@ -68,6 +80,19 @@ class App {
     if (this.tetrahedraComponent) {
       this.tetrahedraComponent.update();
     }
+  }
+
+  // methods to interact with selection
+  selectNode(nodeId) {
+    this.selectionManager.toggleSelection(nodeId);
+  }
+
+  clearSelection() {
+    this.selectionManager.clearSelection();
+  }
+
+  getSelectedNodes() {
+    return this.selectionManager.getSelectedNodes();
   }
 }
 

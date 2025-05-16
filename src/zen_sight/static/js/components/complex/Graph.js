@@ -5,6 +5,11 @@ class Graph {
   constructor(container) {
     this.container = container;
     this.graph = null;
+    this.selectionManager = null;
+  }
+
+  setSelectionManager(selectionManager) {
+    this.selectionManager = selectionManager;
   }
 
   initialize() {
@@ -14,24 +19,38 @@ class Graph {
         // Get node size from data or use default
         const size = node.data?.size || 5;
 
+        // Check if node is selected
+        const isSelected =
+          this.selectionManager && this.selectionManager.isSelected(node.id);
+
+        // Adjust size if selected
+        const finalSize = isSelected ? size * 1.3 : size;
+
         let geometry;
         const shape = node.data?.shape || "sphere";
 
         switch (shape.toLowerCase()) {
           case "box":
-            geometry = new THREE.BoxGeometry(size, size, size);
+            geometry = new THREE.BoxGeometry(finalSize, finalSize, finalSize);
             break;
           case "cylinder":
-            geometry = new THREE.CylinderGeometry(size / 2, size / 2, size, 16);
+            geometry = new THREE.CylinderGeometry(
+              finalSize / 2,
+              finalSize / 2,
+              finalSize,
+              16,
+            );
             break;
           case "sphere":
           default:
-            geometry = new THREE.SphereGeometry(size / 2, 16, 16);
+            geometry = new THREE.SphereGeometry(finalSize / 2, 16, 16);
             break;
         }
 
-        // Create material
-        const material = Materials.createVertexMaterial(node.data);
+        // Use the appropriate material based on selection state
+        const material = isSelected
+          ? Materials.createSelectedVertexMaterial(node.data)
+          : Materials.createVertexMaterial(node.data);
 
         return new THREE.Mesh(geometry, material);
       })
@@ -82,9 +101,27 @@ class Graph {
         return obj;
       });
 
+    this.graph.onNodeClick(this.handleNodeClick.bind(this));
     // Store the scene for access by other components
     this.scene = this.graph.scene();
 
+    return this;
+  }
+
+  handleNodeClick(node, event) {
+    if (this.selectionManager) {
+      // Use SelectionManager
+      if (!(event.ctrlKey || event.metaKey)) {
+        this.selectionManager.clearSelection();
+      }
+      this.selectionManager.toggleSelection(node.id);
+    }
+  }
+
+  refresh() {
+    if (this.graph) {
+      this.graph.refresh();
+    }
     return this;
   }
 
