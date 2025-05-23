@@ -57,19 +57,13 @@
           shellHook = ''
             echo "Entering zen-sight development environment"
 
-            # Create virtual environment
             if [ ! -d ".venv" ]; then
-              ${pythonVersion}/bin/python -m uv venv .venv
+              ${pkgs.uv}/bin/uv venv -p ${pythonVersion}/bin/python .venv
             fi
             source .venv/bin/activate
 
-            uv pip install --upgrade pip
-
-            echo "Installing zen-mapper..."
-            ZEN_MAPPER_PATH=${zen-mapper}
-            uv pip install -e $ZEN_MAPPER_PATH
-
-            uv pip install -e .
+            ${pkgs.uv}/bin/uv pip install git+https://github.com/Jamiller137/zen-mapper.git@add_simplex_tree
+            ${pkgs.uv}/bin/uv pip install -e .
           '';
         };
 
@@ -83,7 +77,6 @@
           propagatedBuildInputs = pythonPackages pkgs.python312Packages;
         };
 
-        # App definition
         apps.default = flake-utils.lib.mkApp {
           drv = self.packages.${system}.default;
           name = "zen-sight";
