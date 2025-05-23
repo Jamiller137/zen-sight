@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib.pyplot import get_cmap
 
 
-def create_torus(n_points=4000, R=3.0, r=1.0, noise_level=0.05):
+def create_torus(n_points=5000, R=3.0, r=1.0, noise_level=0.05):
     theta = 2 * np.pi * np.random.rand(n_points)
     phi = 2 * np.pi * np.random.rand(n_points)
 
