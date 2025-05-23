@@ -3,73 +3,71 @@ import Graph from "./components/complex/Graph.js";
 import Faces from "./components/complex/Faces.js";
 import Tetrahedra from "./components/complex/Tetrahedra.js";
 import SelectionManager from "./components/SelectionManager.js";
+import EditService from "./services/EditService.js";
 
 class App {
   constructor(data) {
     console.log("Initializing app...");
     this.container = document.getElementById("graph-container");
-    // Initialize the selection manager first!
+
+    // Initialize
     this.selectionManager = new SelectionManager();
-    // Set up selection change listener
-    this.selectionManager.onSelectionChange = (selectedNodes) => {
-      console.log("Selected nodes:", selectedNodes);
-      // add UI updates later
-    };
+
+    // Make accessible globally
+    window.appInstance = this;
 
     this.init(data);
-
-    // Start the animation loop
     this.animate();
+
+    console.log("App initialization complete");
   }
 
   init(data) {
     try {
       // Create graph
-      const graphComponent = new Graph(this.container);
-      graphComponent.initialize();
+      this.graphComponent = new Graph(this.container);
+      this.graphComponent.initialize();
 
-      // Connect selection manager to the graph
-      this.selectionManager.setGraph(graphComponent);
+      // Connect components
+      this.selectionManager.setGraph(this.graphComponent);
+      this.graphComponent.setSelectionManager(this.selectionManager);
 
-      this.graphComponent = graphComponent;
+      // Initialize edit service
+      this.editService = new EditService(
+        this.graphComponent,
+        this.selectionManager,
+      );
+
+      this.selectionManager.onSelectionChange = (selectedNodes) => {
+        console.log("Selection changed:", selectedNodes);
+        this.updateButtonStates(selectedNodes);
+      };
 
       const processedData = DataProcessor.processGraphData(data);
 
       // Set the nodes and links to the graph
-      graphComponent.setData({
+      this.graphComponent.setData({
         nodes: processedData.nodes,
         links: processedData.links,
       });
 
       // Create and initialize face renderer if faces exist
       if (processedData.faces && processedData.faces.length > 0) {
-        this.facesComponent = new Faces(graphComponent);
+        this.facesComponent = new Faces(this.graphComponent);
         this.facesComponent.setData(processedData);
-
-        console.log(
-          "Faces initialized with",
-          processedData.faces.length,
-          "faces",
-        );
+        console.log("Faces initialized");
       }
 
       if (processedData.tetrahedra && processedData.tetrahedra.length > 0) {
-        // Create the tetrahedra component with just graphComponent
-        this.tetrahedraComponent = new Tetrahedra(graphComponent);
+        this.tetrahedraComponent = new Tetrahedra(this.graphComponent);
         this.tetrahedraComponent.setData(processedData);
-
-        console.log(
-          "Tetrahedra initialized with",
-          processedData.tetrahedra.length,
-          "tetrahedra",
-        );
+        console.log("Tetrahedra initialized");
       }
     } catch (error) {
       console.error("Error initializing graph:", error);
     }
   }
 
-  // continuously updates faces
   animate() {
     requestAnimationFrame(this.animate.bind(this));
 
@@ -82,17 +80,105 @@ class App {
     }
   }
 
-  // methods to interact with selection
-  selectNode(nodeId) {
-    this.selectionManager.toggleSelection(nodeId);
-  }
-
+  // Selection methods
   clearSelection() {
-    this.selectionManager.clearSelection();
+    console.log("App: Clearing selection");
+    if (this.selectionManager) {
+      this.selectionManager.clearSelection();
+    }
   }
 
-  getSelectedNodes() {
-    return this.selectionManager.getSelectedNodes();
+  // Update button states based on selection
+  updateButtonStates(selectedNodes) {
+    const removeNodeBtn = document.getElementById("btn-remove-node");
+    const removeEdgeBtn = document.getElementById("btn-remove-edge");
+
+    if (removeNodeBtn) {
+      removeNodeBtn.disabled = selectedNodes.length === 0;
+    }
+
+    if (removeEdgeBtn) {
+      removeEdgeBtn.disabled = selectedNodes.length < 2;
+    }
+  }
+
+  // Edit methods
+  async removeSelectedNodes() {
+    console.log("App: Removing selected nodes");
+    if (!this.editService) {
+      console.error("EditService not initialized");
+      return;
+    }
+
+    try {
+      const updatedData = await this.editService.removeSelectedNodes();
+      if (updatedData) {
+        console.log(
+          "Updating graph with new data after node removal:",
+          updatedData,
+        );
+        this.updateGraph(updatedData);
+      }
+    } catch (error) {
+      console.error("Error removing nodes:", error);
+    }
+  }
+
+  async removeEdgesBetweenSelectedNodes() {
+    console.log("App: Removing edges between selected nodes");
+    if (!this.editService) {
+      console.error("EditService not initialized");
+      return;
+    }
+
+    try {
+      const updatedData =
+        await this.editService.removeEdgesBetweenSelectedNodes();
+      if (updatedData) {
+        console.log("Updating graph with new data after edge removal");
+        this.updateGraph(updatedData);
+      }
+    } catch (error) {
+      console.error("Error removing edges:", error);
+    }
+  }
+
+  updateGraph(graphData) {
+    if (!graphData || !this.graphComponent) {
+      console.error("Missing data or graph component for update");
+      return;
+    }
+
+    console.log("Updating graph with:", graphData);
+    this.graphComponent.setData(graphData);
+
+    // updating faces and tetrahedra, use DataProcessor first
+    if (
+      (graphData.faces && graphData.faces.length > 0) ||
+      (graphData.tetrahedra && graphData.tetrahedra.length > 0)
+    ) {
+      const processedData = DataProcessor.processGraphData(graphData);
+
+      // faces
+      if (processedData.faces && processedData.faces.length > 0) {
+        if (this.facesComponent) {
+          this.facesComponent.setData(processedData);
+        } else {
+          this.facesComponent = new Faces(this.graphComponent);
+          this.facesComponent.setData(processedData);
+        }
+      }
+
+      // tetrahedra
+      if (processedData.tetrahedra && processedData.tetrahedra.length > 0) {
+        if (this.tetrahedraComponent) {
+          this.tetrahedraComponent.setData(processedData);
+        } else {
+          this.tetrahedraComponent = new Tetrahedra(this.graphComponent);
+          this.tetrahedraComponent.setData(processedData);
+        }
+      }
+    }
   }
 }
 

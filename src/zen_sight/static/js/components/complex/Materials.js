@@ -12,10 +12,9 @@ class Materials {
     return new THREE.MeshBasicMaterial(config);
   }
 
-  // selected vertex materials
   static createSelectedVertexMaterial(options = {}) {
     const config = {
-      color: options?.selectedColor || 0xffff00, // yellow
+      color: options?.selectedColor || 0xffff00, // Yellow
       emissive: options?.emissive || 0x444400,
       opacity: options?.opacity || 0.9,
       transparent: true,
@@ -60,7 +59,7 @@ class Materials {
       options?.flatShading !== undefined ||
       options?.shininess !== undefined
     ) {
-      material = new THREE.MeshPhongMaterial(config);
+      material = new THREE.MeshBasicMaterial(config);
 
       if (options?.flatShading !== undefined) {
         material.flatShading = options.flatShading;

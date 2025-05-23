@@ -3,31 +3,42 @@ class SelectionManager {
     this.selectedNodes = new Set();
     this.onSelectionChange = null;
     this.graph = null;
+    console.log("SelectionManager initialized");
   }
 
   setGraph(graph) {
     this.graph = graph;
-    // Connect the graph to selection manager
-    if (this.graph) {
-      this.graph.setSelectionManager(this);
-    }
+    console.log("Graph set in SelectionManager");
   }
 
   toggleSelection(nodeID) {
+    console.log("Toggling selection for node:", nodeID);
+
     if (this.selectedNodes.has(nodeID)) {
       this.selectedNodes.delete(nodeID);
     } else {
       this.selectedNodes.add(nodeID);
     }
-    this.refreshGraph();
+
+    // Trigger visualization update
+    if (this.graph && this.graph.refresh) {
+      this.graph.refresh();
+    }
+
     if (this.onSelectionChange) {
       this.onSelectionChange(Array.from(this.selectedNodes));
     }
   }
 
   clearSelection() {
+    console.log("Clearing selection");
     this.selectedNodes.clear();
-    this.refreshGraph();
+
+    // Trigger visualization update
+    if (this.graph && this.graph.refresh) {
+      this.graph.refresh();
+    }
+
     if (this.onSelectionChange) {
       this.onSelectionChange([]);
     }
@@ -36,13 +47,9 @@ class SelectionManager {
   isSelected(nodeID) {
     return this.selectedNodes.has(nodeID);
   }
+
   getSelectedNodes() {
     return Array.from(this.selectedNodes);
-  }
-  refreshGraph() {
-    if (this.graph) {
-      this.graph.refresh();
-    }
   }
 }
 

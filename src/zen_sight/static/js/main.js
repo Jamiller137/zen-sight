@@ -1,36 +1,57 @@
 import App from "./App.js";
 
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Loading visualizer...");
+  console.log("DOM loaded, initializing app...");
 
   try {
     // Get the data from the embedded JSON
     const graphData = JSON.parse(
       document.getElementById("graph-data").textContent,
     );
-    // Create and store app instance globally
-    const app = new App(graphData);
-    window.appInstance = app;
 
-    setupClearSelectionButton();
+    // Create app instance
+    const app = new App(graphData);
+
+    // button listeners
+    setupButtons(app);
   } catch (error) {
     console.error("Failed to initialize:", error);
   }
 });
 
-function setupClearSelectionButton() {
-  const clearButton = document.getElementById("btn-clear-selection");
+function setupButtons(app) {
+  console.log("Setting up button handlers");
 
-  if (clearButton) {
-    clearButton.addEventListener("click", function () {
-      console.log("Clear button clicked");
-      if (window.appInstance && window.appInstance.selectionManager) {
-        window.appInstance.selectionManager.clearSelection();
-      } else {
-        console.warn("Selection manager not found");
-      }
+  // Clear selection button
+  const clearBtn = document.getElementById("btn-clear-selection");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", function () {
+      console.log("Clear selection button clicked");
+      app.clearSelection();
     });
   } else {
     console.warn("Clear selection button not found");
+  }
+
+  // Remove node button
+  const removeNodeBtn = document.getElementById("btn-remove-node");
+  if (removeNodeBtn) {
+    removeNodeBtn.addEventListener("click", function () {
+      console.log("Remove node button clicked");
+      app.removeSelectedNodes();
+    });
+  } else {
+    console.warn("Remove node button not found");
+  }
+
+  // Remove edge button
+  const removeEdgeBtn = document.getElementById("btn-remove-edge");
+  if (removeEdgeBtn) {
+    removeEdgeBtn.addEventListener("click", function () {
+      console.log("Remove edge button clicked");
+      app.removeEdgesBetweenSelectedNodes();
+    });
+  } else {
+    console.warn("Remove edge button not found");
   }
 }

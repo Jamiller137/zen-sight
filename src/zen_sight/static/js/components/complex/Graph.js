@@ -6,10 +6,12 @@ class Graph {
     this.container = container;
     this.graph = null;
     this.selectionManager = null;
+    console.log("Graph initialized");
   }
 
   setSelectionManager(selectionManager) {
     this.selectionManager = selectionManager;
+    console.log("SelectionManager set in Graph");
   }
 
   initialize() {
@@ -23,7 +25,7 @@ class Graph {
         const isSelected =
           this.selectionManager && this.selectionManager.isSelected(node.id);
 
-        // Adjust size if selected
+        // Apply size modifier if selected
         const finalSize = isSelected ? size * 1.3 : size;
 
         let geometry;
@@ -47,7 +49,7 @@ class Graph {
             break;
         }
 
-        // Use the appropriate material based on selection state
+        // Create material based on selection state
         const material = isSelected
           ? Materials.createSelectedVertexMaterial(node.data)
           : Materials.createVertexMaterial(node.data);
@@ -99,27 +101,27 @@ class Graph {
         }
 
         return obj;
+      })
+      .onNodeClick((node, event) => {
+        console.log("Node clicked:", node.id);
+        if (this.selectionManager) {
+          if (!(event.ctrlKey || event.metaKey)) {
+            this.selectionManager.clearSelection();
+          }
+          this.selectionManager.toggleSelection(node.id);
+        }
       });
 
-    this.graph.onNodeClick(this.handleNodeClick.bind(this));
     // Store the scene for access by other components
     this.scene = this.graph.scene();
+    console.log("Graph 3D initialized");
 
     return this;
   }
 
-  handleNodeClick(node, event) {
-    if (this.selectionManager) {
-      // Use SelectionManager
-      if (!(event.ctrlKey || event.metaKey)) {
-        this.selectionManager.clearSelection();
-      }
-      this.selectionManager.toggleSelection(node.id);
-    }
-  }
-
   refresh() {
     if (this.graph) {
+      console.log("Refreshing graph visualization");
       this.graph.refresh();
     }
     return this;
@@ -152,6 +154,10 @@ class Graph {
       y: node.y || 0,
       z: node.z || 0,
     };
+  }
+
+  getGraphData() {
+    return this.graph ? this.graph.graphData() : null;
   }
 }
 

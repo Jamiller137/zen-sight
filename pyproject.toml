@@ -1,11 +1,12 @@
 [project]
 name = "zen-sight"
 version = "0.1.0"
-description = "A 2D simplicial complex visualizer"
+description = "A 3D simplicial complex visualizer"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1.0",
     "networkx>=3.4.2",
+    "numba>=0.61.2",
     "pynvim>=0.5.2",
 ]
