@@ -9,7 +9,6 @@ from matplotlib.pyplot import get_cmap
 
 
 def create_torus(n_points=20000, R=3.0, r=1.0, noise_level=0.05):
-
     theta = 2 * np.pi * np.random.rand(n_points)
     phi = 2 * np.pi * np.random.rand(n_points)
 
@@ -47,7 +46,6 @@ def value_to_hex_color(value: float, min_val=-1.0, max_val=1.0, colormap="viridi
 
 
 if __name__ == "__main__":
-
     dataset = create_torus()
     projection = dataset
     # no projection since picture looks nicer!
@@ -70,7 +68,7 @@ if __name__ == "__main__":
         material_defaults={
             "vertices": {
                 "color": 0x005EBB,  # blue
-                "size": 2,
+                "size": 25,
                 "opacity": 1,
             },
             "edges": {
@@ -84,65 +82,11 @@ if __name__ == "__main__":
                 "opacity": 0.8,
             },
             "tetrahedra": {
-                "color": 0x000001,
+                "color": 0x550055,
                 "opacity": 0.8,
             },
         }
     )
-    deleted_vertex_set = set()
-    for i in range(len(nodes)):
-        data_indices = nodes[i]
-        cluster_data = dataset[data_indices]
-        avg_x_value = np.average(cluster_data[:, 0])
-        avg_y_value = np.average(cluster_data[:, 1])
-        avg_z_value = np.average(cluster_data[:, 2])
-        avg_phi_value = 2 * np.arctan2(avg_y_value, avg_x_value) / np.pi
-        vertex_color = value_to_hex_color(value=avg_phi_value, min_val=-3, max_val=2)
-        if -0.1 < avg_phi_value < 0.2:
-            vertex_opacity = 0.5
-            vertex_color = 0x990000
-            deleted_vertex_set.add(i)
-        else:
-            vertex_opacity = 1
-        viz.set_vertex_material(
-            vertex_id=i,
-            material_props={
-                "color": vertex_color,
-                "size": int(5 + len(cluster_data) / 50),
-                "opacity": vertex_opacity,
-            },
-        )
-
-    edges = simplex_tree.get_simplices(dim=1)
-    # make edges invisible if they are incident
-    # to invisible edges
-    for edge in edges:
-        if len(list(set(edge) & set(deleted_vertex_set))) == 1:
-            viz.set_edge_material(
-                source_id=edge[0],
-                target_id=edge[-1],
-                material_props={
-                    "opacity": 0.0001,
-                },
-            )
-        # make edges dotted if they link between invisible edges
-        if len(list(set(edge) & set(deleted_vertex_set))) == 2:
-            viz.set_edge_material(
-                source_id=edge[0],
-                target_id=edge[-1],
-                material_props={"color": 0x550202, "opacity": 1, "dashed": True},
-            )
-
-    # make faces incident with invisible vertices invisible
-    faces = simplex_tree.get_simplices(dim=2)
-    for face in faces:
-        if list(set(face) & set(deleted_vertex_set)):
-            viz.set_face_material(
-                vertex_ids=face,
-                material_props={
-                    "opacity": 0.0001,
-                },
-            )
     # Run the visualization
     print("\nLaunching visualization with material customizations...")
     viz.show(port=5000)
