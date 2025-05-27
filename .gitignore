@@ -11,3 +11,10 @@ wheels/
 
 # Ignore Windows Zone.Identifier files
 *:Zone.Identifier
+
+# Node stuff
+src/frontend/node_modules/
+src/frontend/build/
+src/scripts/
+*.log
+

@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
+import ForceGraph3D from "react-force-graph-3d";
 import axios from "axios";
 import "./App.css";
 
 function App() {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
+  const [graphConfig, setGraphConfig] = useState({});
+  const [graphType, setGraphType] = useState("3D");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,8 +16,12 @@ function App() {
 
   const fetchGraphData = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/api/graph-data");
-      setGraphData(response.data);
+      const response = await axios.get("/api/graph-data");
+      const { graphType: type, data, config } = response.data;
+
+      setGraphType(type);
+      setGraphData(data);
+      setGraphConfig(config);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching graph data:", error);
@@ -22,42 +29,35 @@ function App() {
     }
   };
 
-  const handleDataUpload = async (data) => {
+  const toggleGraphType = async () => {
+    const newType = graphType === "3D" ? "2D" : "3D";
     try {
-      const response = await axios.post("/api/process", data);
-      setGraphData(response.data);
+      const response = await axios.get(`/api/set-type/${newType}`);
+      const { graphType: type, data, config } = response.data;
+
+      setGraphType(type);
+      setGraphData(data);
+      setGraphConfig(config);
     } catch (error) {
-      console.error("Error processing data:", error);
+      console.error("Error switching graph type:", error);
     }
   };
+
+  const ForceGraphComponent = graphType === "3D" ? ForceGraph3D : ForceGraph2D;
 
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Force Graph Visualization</h1>
+        <h1>Zen Sight</h1>
+        <button onClick={toggleGraphType} className="toggle-button">
+          Switch to {graphType === "3D" ? "2D" : "3D"}
+        </button>
       </header>
       <div className="graph-container">
         {loading ? (
-          <p>Loading graph data...</p>
+          <p>Loading...</p>
         ) : (
-          <ForceGraph2D
-            graphData={graphData}
-            nodeLabel="name"
-            nodeAutoColorBy="group"
-            linkDirectionalParticles={2}
-            linkDirectionalParticleSpeed={0.01}
-            nodeCanvasObject={(node, ctx, globalScale) => {
-              const label = node.name || node.id;
-              const fontSize = 12 / globalScale;
-              ctx.font = `${fontSize}px Sans-Serif`;
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-              ctx.fillStyle = "black";
-              ctx.fillText(label, node.x, node.y);
-            }}
-            width={800}
-            height={600}
-          />
+          <ForceGraphComponent graphData={graphData} {...graphConfig} />
         )}
       </div>
     </div>
