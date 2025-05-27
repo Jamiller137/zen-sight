@@ -1,4 +1,4 @@
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 
 
 class Sight:
@@ -7,6 +7,7 @@ class Sight:
         graph_type: str = "3D",
         nodes: Optional[List[Dict]] = None,
         links: Optional[List[Dict]] = None,
+        faces: Optional[List[Dict]] = None,
         config: Optional[Dict] = None
     ):
         """
@@ -27,6 +28,7 @@ class Sight:
         self.graph_type = graph_type
         self.nodes = nodes or []
         self.links = links or []
+        self.faces = faces or []
         self.config = config or {}
 
     def set_nodes(self, nodes: List[Dict]) -> 'Sight':
@@ -37,6 +39,14 @@ class Sight:
     def set_links(self, links: List[Dict]) -> 'Sight':
         """Set graph links"""
         self.links = links
+        return self
+
+    def set_faces(self, faces: List[Tuple[Any, Any, Any]]) -> 'Sight':
+        """A face is a triple of nodeIds"""
+        self.faces = [
+            {"nodes": list(f), "id": f"face-{i}"}
+            for i, f in enumerate(faces)
+        ]
         return self
 
     def set_config(self, config: Dict[str, Any]) -> 'Sight':
@@ -57,7 +67,8 @@ class Sight:
             "graphType": self.graph_type,
             "data": {
                 "nodes": self.nodes,
-                "links": self.links
+                "links": self.links,
+                "faces": self.faces,
             },
             "config": self.config
         }

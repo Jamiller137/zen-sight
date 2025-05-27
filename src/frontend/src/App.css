@@ -25,6 +25,12 @@
 .App-header h1 {
   font-size: 1.5rem;
   font-weight: 300;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
 }
 
 .toggle-button {
@@ -43,6 +49,7 @@
 }
 
 .graph-container {
+  width: 100%;
   flex: 1;
   position: relative;
   overflow: hidden;

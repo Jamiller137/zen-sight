@@ -6,15 +6,11 @@ dist/
 wheels/
 *.egg-info
 
-# Virtual environments
 .venv
-
-# Ignore Windows Zone.Identifier files
 *:Zone.Identifier
 
 # Node stuff
 src/frontend/node_modules/
 src/frontend/build/
-src/scripts/
 *.log
 
