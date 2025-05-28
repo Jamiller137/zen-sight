@@ -6,7 +6,8 @@ def vis_nx(
         rel_size: float = 3, 
         link_color: str = "#000000", 
         link_width: float = 2, 
-        bg_color: str = "#f2f2f2"):
+        bg_color: str = "#f2f2f2",
+        port: int = 5050):
 
     nodes = []
     links = []
@@ -41,5 +42,5 @@ def vis_nx(
             "nodeOpacity": 1,
         }
     )
-    sight.show()
+    sight.show(port=port)
 
