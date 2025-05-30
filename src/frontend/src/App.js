@@ -15,6 +15,10 @@ function App() {
   const [graphType, setGraphType] = useState("3D");
   const [loading, setLoading] = useState(true);
   const [showFaces, setShowFaces] = useState(true);
+  const [selectedNodes, setSelectedNodes] = useState(new Set());
+  const [selectedFaces, setSelectedFaces] = useState(new Set());
+  const [selectionMode, setSelectionMode] = useState("multi"); // "single", "multi", "none"
+
   const graphRef = useRef();
   const faceMeshesRef = useRef([]);
 
@@ -26,9 +30,6 @@ function App() {
     try {
       const response = await axios.get("http://127.0.0.1:5050/api/graph-data");
       const { graphType: type, data, config } = response.data;
-
-      console.log("Received data:", data);
-      console.log("Number of faces:", data.faces ? data.faces.length : 0);
 
       setGraphType(type);
       setGraphData(data);
@@ -51,10 +52,102 @@ function App() {
       setGraphType(type);
       setGraphData(data);
       setGraphConfig(config);
+      clearSelections();
     } catch (error) {
       console.error("Error switching graph type:", error);
     }
   };
+
+  const clearSelections = () => {
+    setSelectedNodes(new Set());
+    setSelectedFaces(new Set());
+  };
+
+  const handleNodeClick = useCallback(
+    (node, event) => {
+      if (selectionMode === "none") return;
+
+      const nodeId = node.id;
+      setSelectedNodes((prev) => {
+        const newSelection = new Set(prev);
+
+        if (selectionMode === "single") {
+          newSelection.clear();
+          newSelection.add(nodeId);
+        } else if (selectionMode === "multi") {
+          if (event?.ctrlKey || event?.metaKey) {
+            if (newSelection.has(nodeId)) {
+              newSelection.delete(nodeId);
+            } else {
+              newSelection.add(nodeId);
+            }
+          } else {
+            newSelection.clear();
+            newSelection.add(nodeId);
+          }
+        }
+
+        return newSelection;
+      });
+    },
+    [selectionMode],
+  );
+
+  const handleFaceClick = useCallback(
+    (faceId, event) => {
+      if (selectionMode === "none") return;
+
+      setSelectedFaces((prev) => {
+        const newSelection = new Set(prev);
+
+        if (selectionMode === "single") {
+          newSelection.clear();
+          newSelection.add(faceId);
+        } else if (selectionMode === "multi") {
+          if (event?.ctrlKey || event?.metaKey) {
+            if (newSelection.has(faceId)) {
+              newSelection.delete(faceId);
+            } else {
+              newSelection.add(faceId);
+            }
+          } else {
+            newSelection.clear();
+            newSelection.add(faceId);
+          }
+        }
+
+        return newSelection;
+      });
+    },
+    [selectionMode],
+  );
+
+  const handle3DClick = useCallback(
+    (object, event) => {
+      if (object && object.userData?.isFace) {
+        handleFaceClick(object.userData.faceId, event);
+      }
+    },
+    [handleFaceClick],
+  );
+
+  const getNodeColor = useCallback(
+    (node) => {
+      if (selectedNodes.has(node.id)) {
+        return graphConfig.selectedNodeColor || "#ff6969";
+      }
+      return node.color || graphConfig.nodeColor || "#696969";
+    },
+    [selectedNodes, graphConfig],
+  );
+
+  const getNodeSize = useCallback(
+    (node) => {
+      const baseSize = node.size || graphConfig.nodeSize || 5;
+      return selectedNodes.has(node.id) ? baseSize * 1.5 : baseSize;
+    },
+    [selectedNodes, graphConfig],
+  );
 
   const cleanupFaces3D = useCallback(() => {
     if (!graphRef.current || graphType !== "3D") return;
@@ -63,16 +156,12 @@ function App() {
     if (!fg.scene) return;
 
     const scene = fg.scene();
-
-    // Remove existing face meshes
     faceMeshesRef.current.forEach((mesh) => {
       scene.remove(mesh);
       if (mesh.geometry) mesh.geometry.dispose();
       if (mesh.material) mesh.material.dispose();
     });
     faceMeshesRef.current = [];
-
-    console.log("Removed all face meshes from 3D scene");
   }, [graphType]);
 
   const toggleFaces = () => {
@@ -86,9 +175,7 @@ function App() {
 
   const paintFaces2D = useCallback(
     (ctx) => {
-      if (!showFaces || !graphData.faces || graphData.faces.length === 0)
-        return;
-      if (!graphData.nodes) return;
+      if (!showFaces || !graphData.faces?.length || !graphData.nodes) return;
 
       ctx.save();
 
@@ -105,26 +192,30 @@ function App() {
           .filter((pos) => pos);
 
         if (positions.length === 3) {
+          const isSelected = selectedFaces.has(face.id);
+
           ctx.beginPath();
           ctx.moveTo(positions[0].x, positions[0].y);
           ctx.lineTo(positions[1].x, positions[1].y);
           ctx.lineTo(positions[2].x, positions[2].y);
           ctx.closePath();
 
-          ctx.fillStyle =
-            graphConfig.faceFillColor || "rgba(100, 150, 250, 0.2)";
+          ctx.fillStyle = isSelected
+            ? graphConfig.selectedFaceFillColor || "rgba(255, 107, 107, 0.4)"
+            : graphConfig.faceFillColor || "rgba(100, 150, 250, 0.2)";
           ctx.fill();
 
-          ctx.strokeStyle =
-            graphConfig.faceStrokeColor || "rgba(100, 150, 250, 0.5)";
-          ctx.lineWidth = graphConfig.faceStrokeWidth || 1;
+          ctx.strokeStyle = isSelected
+            ? graphConfig.selectedFaceStrokeColor || "rgba(255, 107, 107, 0.8)"
+            : graphConfig.faceStrokeColor || "rgba(100, 150, 250, 0.5)";
+          ctx.lineWidth = isSelected ? 2 : graphConfig.faceStrokeWidth || 1;
           ctx.stroke();
         }
       });
 
       ctx.restore();
     },
-    [showFaces, graphData, graphConfig],
+    [showFaces, graphData, graphConfig, selectedFaces],
   );
 
   const updateFaces3D = useCallback(() => {
@@ -142,7 +233,7 @@ function App() {
     });
     faceMeshesRef.current = [];
 
-    if (!showFaces || !graphData.faces || graphData.faces.length === 0) return;
+    if (!showFaces || !graphData.faces?.length) return;
 
     const nodeMap = {};
     graphData.nodes.forEach((node) => {
@@ -153,20 +244,26 @@ function App() {
       };
     });
 
-    const material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(graphConfig.faceFillColor || "#6496fa"),
-      opacity: graphConfig.faceOpacity || 0.3,
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
-
     graphData.faces.forEach((face) => {
       const positions = face.nodes
         .map((nodeId) => nodeMap[nodeId])
         .filter((pos) => pos);
 
       if (positions.length === 3) {
+        const isSelected = selectedFaces.has(face.id);
+
+        const material = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(
+            isSelected
+              ? graphConfig.selectedFaceFillColor || "#ff6b6b"
+              : graphConfig.faceFillColor || "#6496fa",
+          ),
+          opacity: isSelected ? 0.6 : graphConfig.faceOpacity || 0.3,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+
         const geometry = new THREE.BufferGeometry();
         const vertices = new Float32Array([
           positions[0].x,
@@ -192,40 +289,8 @@ function App() {
         faceMeshesRef.current.push(mesh);
       }
     });
+  }, [showFaces, graphData, graphConfig, graphType, selectedFaces]);
 
-    console.log(
-      `${showFaces ? "Added" : "Removed"} ${faceMeshesRef.current.length} face meshes`,
-    );
-  }, [showFaces, graphData, graphConfig, graphType]);
-
-  useEffect(() => {
-    if (graphType === "3D" && !loading) {
-      // initial delay
-      const initTimer = setTimeout(() => {
-        updateFaces3D();
-      }, 500);
-
-      // update once per second
-      const updateTimer = setInterval(() => {
-        updateFaces3D();
-      }, 1000);
-
-      // stop updating after 10 seconds
-      const stopTimer = setTimeout(() => {
-        clearInterval(updateTimer);
-      }, 10000);
-
-      return () => {
-        clearTimeout(initTimer);
-        clearInterval(updateTimer);
-        clearTimeout(stopTimer);
-      };
-    }
-  }, [graphType, loading, updateFaces3D, showFaces]); // Added showFaces to dependencies
-
-  const ForceGraphComponent = graphType === "3D" ? ForceGraph3D : ForceGraph2D;
-
-  // also use onEngineTick for more updates
   const handle3DEngineTick = useCallback(() => {
     if (!graphRef.current) return;
 
@@ -237,6 +302,22 @@ function App() {
     }
   }, [updateFaces3D]);
 
+  useEffect(() => {
+    if (graphType === "3D" && !loading) {
+      const initTimer = setTimeout(() => updateFaces3D(), 500);
+      const updateTimer = setInterval(() => updateFaces3D(), 1000);
+      const stopTimer = setTimeout(() => clearInterval(updateTimer), 10000);
+
+      return () => {
+        clearTimeout(initTimer);
+        clearInterval(updateTimer);
+        clearTimeout(stopTimer);
+      };
+    }
+  }, [graphType, loading, updateFaces3D, showFaces]);
+
+  const ForceGraphComponent = graphType === "3D" ? ForceGraph3D : ForceGraph2D;
+
   return (
     <div className="App">
       <header className="App-header">
@@ -245,13 +326,36 @@ function App() {
           <button onClick={toggleGraphType} className="toggle-button">
             Switch to {graphType === "3D" ? "2D" : "3D"}
           </button>
-          {graphData.faces && graphData.faces.length > 0 && (
+
+          {graphData.faces?.length > 0 && (
             <button onClick={toggleFaces} className="toggle-button">
               {showFaces ? "Hide" : "Show"} Faces ({graphData.faces.length})
             </button>
           )}
+
+          <select
+            value={selectionMode}
+            onChange={(e) => setSelectionMode(e.target.value)}
+            className="selection-mode"
+          >
+            <option value="single">Single Select</option>
+            <option value="multi">Multi Select</option>
+            <option value="none">No Selection</option>
+          </select>
+
+          <button onClick={clearSelections} className="clear-button">
+            Clear Selection
+          </button>
         </div>
+
+        {(selectedNodes.size > 0 || selectedFaces.size > 0) && (
+          <div className="selection-info">
+            {selectedNodes.size > 0 && <span>Nodes: {selectedNodes.size}</span>}
+            {selectedFaces.size > 0 && <span>Faces: {selectedFaces.size}</span>}
+          </div>
+        )}
       </header>
+
       <div className="graph-container">
         {loading ? (
           <p>Loading...</p>
@@ -260,12 +364,14 @@ function App() {
             ref={graphRef}
             graphData={graphData}
             {...graphConfig}
+            nodeColor={getNodeColor}
+            nodeVal={getNodeSize}
+            onNodeClick={handleNodeClick}
             {...(graphType === "2D"
-              ? {
-                  onRenderFramePost: paintFaces2D,
-                }
+              ? { onRenderFramePost: paintFaces2D }
               : {
                   onEngineTick: handle3DEngineTick,
+                  onObjectClick: handle3DClick,
                 })}
           />
         )}
