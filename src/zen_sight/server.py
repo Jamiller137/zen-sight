@@ -163,10 +163,105 @@ def create_app(sight_instance):
                 if not any(node_id in node_ids_to_cut for node_id in face["nodes"])
             ]
 
+        elif operation["type"] == "split_nodes":
+            original_node_ids = set(operation["data"]["originalNodeIds"])
+            duplicated_node_ids = operation["data"]["duplicatedNodeIds"]
+            split_color = operation["data"].get("splitColor", "#69ff69")
+
+            node_id_mapping = {}
+            for i, original_id in enumerate(operation["data"]["originalNodeIds"]):
+                if i < len(duplicated_node_ids):
+                    node_id_mapping[original_id] = duplicated_node_ids[i]
+
+            for original_id in original_node_ids:
+                affected_nodes_colors[original_id] = split_color
+
+            for original_id in original_node_ids:
+                original_node = next(
+                    (node for node in graph_data["nodes"] if node["id"] == original_id),
+                    None,
+                )
+                if original_node and original_id in node_id_mapping:
+                    duplicated_id = node_id_mapping[original_id]
+                    duplicated_node = json.loads(json.dumps(original_node))  # Deep copy
+                    duplicated_node["id"] = duplicated_id
+                    duplicated_node["color"] = split_color
+
+                    # Offset position slightly for visibility
+                    if "x" in duplicated_node:
+                        duplicated_node["x"] += hash(duplicated_id) % 40 - 20
+                    if "y" in duplicated_node:
+                        duplicated_node["y"] += hash(duplicated_id) % 40 - 20
+                    if "z" in duplicated_node:
+                        duplicated_node["z"] += hash(duplicated_id) % 40 - 20
+
+                    graph_data["nodes"].append(duplicated_node)
+                    affected_nodes_colors[duplicated_id] = split_color
+
+            new_links = []
+            for link in graph_data["links"]:
+                source_id = link["source"]
+                target_id = link["target"]
+
+                if (
+                    source_id in original_node_ids
+                    and target_id not in original_node_ids
+                ):
+                    if source_id in node_id_mapping:
+                        new_link = json.loads(json.dumps(link))
+                        new_link["source"] = node_id_mapping[source_id]
+                        new_links.append(new_link)
+
+                elif (
+                    source_id not in original_node_ids
+                    and target_id in original_node_ids
+                ):
+                    if target_id in node_id_mapping:
+                        new_link = json.loads(json.dumps(link))
+                        new_link["target"] = node_id_mapping[target_id]
+                        new_links.append(new_link)
+
+                elif source_id in original_node_ids and target_id in original_node_ids:
+                    if source_id in node_id_mapping and target_id in node_id_mapping:
+                        new_link = json.loads(json.dumps(link))
+                        new_link["source"] = node_id_mapping[source_id]
+                        new_link["target"] = node_id_mapping[target_id]
+                        new_links.append(new_link)
+
+            graph_data["links"].extend(new_links)
+
+            new_faces = []
+            for face in graph_data["faces"]:
+                has_selected_node = any(
+                    node_id in original_node_ids for node_id in face["nodes"]
+                )
+
+                if has_selected_node:
+                    new_face_nodes = []
+                    for node_id in face["nodes"]:
+                        if node_id in original_node_ids and node_id in node_id_mapping:
+                            new_face_nodes.append(node_id_mapping[node_id])
+                        else:
+                            new_face_nodes.append(node_id)
+
+                    new_face = json.loads(json.dumps(face))
+                    new_face["id"] = f"{face['id']}_split_{len(new_faces)}"
+                    new_face["nodes"] = new_face_nodes
+                    new_faces.append(new_face)
+
+            graph_data["faces"].extend(new_faces)
+
+            # apply colors to affected nodes
+            for node in graph_data["nodes"]:
+                if node["id"] in affected_nodes_colors:
+                    node["color"] = affected_nodes_colors[node["id"]]
+
         elif operation["type"] == "toggle_graph_type":
             pass
 
-        # don't forget to add more operation types later
+        for node in graph_data["nodes"]:
+            if node["id"] in affected_nodes_colors:
+                node["color"] = affected_nodes_colors[node["id"]]
 
         return graph_data, affected_nodes_colors
 

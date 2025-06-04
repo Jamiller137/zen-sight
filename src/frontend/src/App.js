@@ -1,5 +1,3 @@
-// App.js - Fixed timeline state reconstruction
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import ForceGraph3D from "react-force-graph-3d";
@@ -22,9 +20,10 @@ function App() {
   const [selectionMode, setSelectionMode] = useState("single");
   const [affectedNodes, setAffectedNodes] = useState(new Set());
   const [cutOperations, setCutOperations] = useState([]);
+  const [splitOperations, setSplitOperations] = useState([]);
   const [selectedCutColor, setSelectedCutColor] = useState("#ff6969");
+  const [selectedSplitColor, setSelectedSplitColor] = useState("#69ff69");
 
-  // Timeline state - now tracking operations
   const [operationsHistory, setOperationsHistory] = useState([]);
   const [currentOperationIndex, setCurrentOperationIndex] = useState(-1);
   const [showTimeline, setShowTimeline] = useState(false);
@@ -32,14 +31,11 @@ function App() {
   const [forceGraphKey, setForceGraphKey] = useState(0);
 
   const predefinedColors = [
-    "#ff6969",
     "#69ff69",
-    "#6969ff",
     "#ffff69",
-    "#ff69ff",
     "#69ffff",
     "#ffa500",
-    "#800080",
+    "#6969ff",
   ];
 
   const [isLassoMode, setIsLassoMode] = useState(false);
@@ -54,7 +50,6 @@ function App() {
   useEffect(() => {
     fetchGraphData();
 
-    // Cleanup on unmount
     return () => {
       performCompleteCleanup();
     };
@@ -70,12 +65,10 @@ function App() {
   }, [selectionMode, graphType]);
 
   const performCompleteCleanup = useCallback(() => {
-    // Clear pending timeouts
     if (cleanupTimeoutRef.current) {
       clearTimeout(cleanupTimeoutRef.current);
     }
 
-    // Clean up 3D
     if (faceMeshesRef.current.length > 0) {
       faceMeshesRef.current.forEach((mesh) => {
         if (mesh.geometry) {
@@ -95,9 +88,7 @@ function App() {
       faceMeshesRef.current = [];
     }
 
-    // Clean up reference
     if (graphRef.current) {
-      // Stop simulations
       if (graphRef.current.d3Force) {
         graphRef.current.d3Force("charge", null);
         graphRef.current.d3Force("link", null);
@@ -108,36 +99,48 @@ function App() {
         graphRef.current.tickCount = 0;
       }
 
-      // Dispose WebGL context
       if (graphRef.current.renderer && graphRef.current.renderer.dispose) {
         graphRef.current.renderer.dispose();
       }
     }
   }, []);
 
-  const reconstructCutOperations = useCallback((history, upToIndex) => {
+  const reconstructOperations = useCallback((history, upToIndex) => {
     const reconstructedCutOps = [];
+    const reconstructedSplitOps = [];
     const allAffectedNodes = new Set();
 
     for (let i = 0; i <= upToIndex; i++) {
       const operation = history[i];
-      if (operation && operation.type === "cut_nodes" && operation.data) {
-        const cutOp = {
-          id: Date.now() + i, // Unique ID for reconstruction
-          color: operation.data.cutColor || "#ff6969",
-          affectedNodes: new Set(operation.data.affectedNodeIds || []),
-          timestamp: new Date(operation.timestamp).toLocaleTimeString(),
-        };
-
-        reconstructedCutOps.push(cutOp);
-
-        // Add to affected nodes
-        cutOp.affectedNodes.forEach((nodeId) => allAffectedNodes.add(nodeId));
+      if (operation && operation.data) {
+        if (operation.type === "cut_nodes") {
+          const cutOp = {
+            id: Date.now() + i,
+            color: operation.data.cutColor || "#ff6969",
+            affectedNodes: new Set(operation.data.affectedNodeIds || []),
+            timestamp: new Date(operation.timestamp).toLocaleTimeString(),
+          };
+          reconstructedCutOps.push(cutOp);
+          cutOp.affectedNodes.forEach((nodeId) => allAffectedNodes.add(nodeId));
+        } else if (operation.type === "split_nodes") {
+          const splitOp = {
+            id: Date.now() + i + 1000,
+            color: operation.data.splitColor || "#69ff69",
+            originalNodes: new Set(operation.data.originalNodeIds || []),
+            duplicatedNodes: new Set(operation.data.duplicatedNodeIds || []),
+            timestamp: new Date(operation.timestamp).toLocaleTimeString(),
+          };
+          reconstructedSplitOps.push(splitOp);
+          splitOp.duplicatedNodes.forEach((nodeId) =>
+            allAffectedNodes.add(nodeId),
+          );
+        }
       }
     }
 
     return {
       cutOperations: reconstructedCutOps,
+      splitOperations: reconstructedSplitOps,
       affectedNodes: allAffectedNodes,
     };
   }, []);
@@ -200,13 +203,14 @@ function App() {
 
       const {
         cutOperations: reconstructedCutOps,
+        splitOperations: reconstructedSplitOps,
         affectedNodes: reconstructedAffectedNodes,
-      } = reconstructCutOperations(operationsHistory, operationIndex);
+      } = reconstructOperations(operationsHistory, operationIndex);
 
       setCutOperations(reconstructedCutOps);
+      setSplitOperations(reconstructedSplitOps);
       setAffectedNodes(reconstructedAffectedNodes);
 
-      // Force complete re-mount with new key
       setForceGraphKey((prev) => prev + 1);
 
       setGraphData({
@@ -217,10 +221,9 @@ function App() {
 
       setCurrentOperationIndex(operationIndex);
 
-      // Delay for proper cleanup and re-mount
       cleanupTimeoutRef.current = setTimeout(() => {
         setIsReplayingOperation(false);
-      }, 300);
+      }, 60);
     } catch (error) {
       console.error("Error replaying to operation:", error);
       setIsReplayingOperation(false);
@@ -252,11 +255,9 @@ function App() {
 
     performCompleteCleanup();
 
-    // switch the view type locally -- don't call the server
     setGraphType(newType);
     clearSelections();
 
-    // Force re-mount for type change
     setForceGraphKey((prev) => prev + 1);
 
     if (newType === "2D" && selectionMode === "lasso") {
@@ -271,13 +272,125 @@ function App() {
     setIsDrawing(false);
   };
 
+  const splitSelectedNodes = useCallback(async () => {
+    if (selectedNodes.size === 0) return;
+
+    const selectedNodeIds = Array.from(selectedNodes);
+    const duplicatedNodeIds = [];
+    const nodeIdMapping = new Map();
+
+    const newNodes = [...graphData.nodes];
+    selectedNodeIds.forEach((originalId) => {
+      const originalNode = graphData.nodes.find(
+        (node) => node.id === originalId,
+      );
+      if (originalNode) {
+        const duplicatedId = `${originalId}_split_${Date.now()}`;
+        const duplicatedNode = {
+          ...originalNode,
+          id: duplicatedId,
+          x: (originalNode.x || 0) + (Math.random() - 0.5) * 20,
+          y: (originalNode.y || 0) + (Math.random() - 0.5) * 20,
+          z: (originalNode.z || 0) + (Math.random() - 0.5) * 20,
+        };
+
+        newNodes.push(duplicatedNode);
+        duplicatedNodeIds.push(duplicatedId);
+        nodeIdMapping.set(originalId, duplicatedId);
+      }
+    });
+
+    const newLinks = [...graphData.links];
+    graphData.links.forEach((link) => {
+      const sourceId =
+        typeof link.source === "object" ? link.source.id : link.source;
+      const targetId =
+        typeof link.target === "object" ? link.target.id : link.target;
+
+      if (selectedNodes.has(sourceId) && !selectedNodes.has(targetId)) {
+        newLinks.push({
+          ...link,
+          source: nodeIdMapping.get(sourceId),
+          target: targetId,
+        });
+      } else if (!selectedNodes.has(sourceId) && selectedNodes.has(targetId)) {
+        newLinks.push({
+          ...link,
+          source: sourceId,
+          target: nodeIdMapping.get(targetId),
+        });
+      } else if (selectedNodes.has(sourceId) && selectedNodes.has(targetId)) {
+        newLinks.push({
+          ...link,
+          source: nodeIdMapping.get(sourceId),
+          target: nodeIdMapping.get(targetId),
+        });
+      }
+    });
+
+    const newFaces = [...(graphData.faces || [])];
+    graphData.faces?.forEach((face) => {
+      const hasSelectedNode = face.nodes.some((nodeId) =>
+        selectedNodes.has(nodeId),
+      );
+
+      if (hasSelectedNode) {
+        const newFaceNodes = face.nodes.map((nodeId) =>
+          selectedNodes.has(nodeId) ? nodeIdMapping.get(nodeId) : nodeId,
+        );
+
+        newFaces.push({
+          ...face,
+          id: `${face.id}_split_${Date.now()}`,
+          nodes: newFaceNodes,
+        });
+      }
+    });
+
+    const splitOperation = {
+      id: Date.now(),
+      color: selectedSplitColor,
+      originalNodes: new Set(selectedNodeIds),
+      duplicatedNodes: new Set(duplicatedNodeIds),
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    setSplitOperations((prev) => [...prev, splitOperation]);
+
+    setGraphData({
+      nodes: newNodes,
+      links: newLinks,
+      faces: newFaces,
+    });
+
+    setAffectedNodes((prev) => {
+      const updated = new Set(prev);
+      selectedNodeIds.forEach((nodeId) => updated.add(nodeId));
+      duplicatedNodeIds.forEach((nodeId) => updated.add(nodeId));
+      return updated;
+    });
+
+    setSelectedNodes(new Set());
+    setSelectedFaces(new Set());
+
+    setTimeout(
+      () =>
+        saveOperation("split_nodes", `Split ${selectedNodeIds.length} nodes`, {
+          originalNodeIds: selectedNodeIds,
+          duplicatedNodeIds: duplicatedNodeIds,
+          splitColor: selectedSplitColor,
+          affectedNodeIds: [...selectedNodeIds, ...duplicatedNodeIds],
+        }),
+      500,
+    );
+  }, [selectedNodes, graphData, selectedSplitColor, saveOperation]);
+
   const cutSelectedNodes = useCallback(async () => {
     if (selectedNodes.size === 0) return;
 
     const selectedNodeIds = Array.from(selectedNodes);
     const newAffectedNodes = new Set();
 
-    // Find affected nodes (nodes incident to cut nodes)
     graphData.links.forEach((link) => {
       const sourceId =
         typeof link.source === "object" ? link.source.id : link.source;
@@ -292,7 +405,6 @@ function App() {
       }
     });
 
-    // from faces
     graphData.faces?.forEach((face) => {
       const hasSelectedNode = face.nodes.some((nodeId) =>
         selectedNodes.has(nodeId),
@@ -306,7 +418,6 @@ function App() {
       }
     });
 
-    // Create cut operation record
     const cutOperation = {
       id: Date.now(),
       color: selectedCutColor,
@@ -316,7 +427,6 @@ function App() {
 
     setCutOperations((prev) => [...prev, cutOperation]);
 
-    // Filter out cut nodes and incident simplices
     const newNodes = graphData.nodes.filter(
       (node) => !selectedNodes.has(node.id),
     );
@@ -338,7 +448,6 @@ function App() {
       faces: newFaces,
     });
 
-    // Update affected nodes
     setAffectedNodes((prev) => {
       const updated = new Set(prev);
       newAffectedNodes.forEach((nodeId) => updated.add(nodeId));
@@ -348,7 +457,6 @@ function App() {
     setSelectedNodes(new Set());
     setSelectedFaces(new Set());
 
-    // save cut
     setTimeout(
       () =>
         saveOperation("cut_nodes", `Cut ${selectedNodeIds.length} nodes`, {
@@ -545,7 +653,12 @@ function App() {
         return graphConfig.selectedNodeColor || "#ff6969";
       }
 
-      // check cut operations for affected nodes (preserve colors)
+      for (let i = splitOperations.length - 1; i >= 0; i--) {
+        if (splitOperations[i].duplicatedNodes.has(node.id)) {
+          return splitOperations[i].color;
+        }
+      }
+
       for (let i = cutOperations.length - 1; i >= 0; i--) {
         if (cutOperations[i].affectedNodes.has(node.id)) {
           return cutOperations[i].color;
@@ -554,7 +667,7 @@ function App() {
 
       return node.color || graphConfig.nodeColor || "#696969";
     },
-    [selectedNodes, cutOperations, graphConfig],
+    [selectedNodes, cutOperations, splitOperations, graphConfig],
   );
 
   const getNodeSize = useCallback(
@@ -648,7 +761,6 @@ function App() {
 
     const scene = fg.scene();
 
-    // Clean up
     faceMeshesRef.current.forEach((mesh) => {
       scene.remove(mesh);
       if (mesh.geometry) mesh.geometry.dispose();
@@ -811,126 +923,147 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Zen Sight</h1>
-        <div className="controls">
-          <button onClick={toggleGraphType} className="toggle-button">
-            Switch to {graphType === "3D" ? "2D" : "3D"}
-          </button>
+        <div className="header-left">
+          <h1>Zen Sight</h1>
+        </div>
 
+        <div className="header-center">
+          <div className="view-controls">
+            <button onClick={toggleGraphType} className="btn btn--default">
+              {graphType === "3D" ? "2D" : "3D"}
+            </button>
+
+            {graphData.faces?.length > 0 && (
+              <button onClick={toggleFaces} className="btn btn--default">
+                {showFaces ? "Hide" : "Show"} Faces ({graphData.faces.length})
+              </button>
+            )}
+
+            <select
+              value={selectionMode}
+              onChange={(e) => setSelectionMode(e.target.value)}
+              className="selection-mode"
+            >
+              {getAvailableSelectionModes().map((mode) => (
+                <option key={mode.value} value={mode.value}>
+                  {mode.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="header-right">
           <button
             onClick={() => setShowTimeline(!showTimeline)}
-            className="toggle-button"
+            className="btn btn--default"
           >
-            {showTimeline ? "Hide" : "Show"} Timeline
+            Timeline
           </button>
+        </div>
+      </header>
 
-          {graphData.faces?.length > 0 && (
-            <button onClick={toggleFaces} className="toggle-button">
-              {showFaces ? "Hide" : "Show"} Faces ({graphData.faces.length})
-            </button>
-          )}
+      {isLassoMode && graphType === "3D" && (
+        <div className="status-bar">
+          <div className="lasso-info">Click and drag to select nodes</div>
+        </div>
+      )}
 
-          <select
-            value={selectionMode}
-            onChange={(e) => setSelectionMode(e.target.value)}
-            className="selection-mode"
-          >
-            {getAvailableSelectionModes().map((mode) => (
-              <option key={mode.value} value={mode.value}>
-                {mode.label}
-              </option>
-            ))}
-          </select>
-
-          <button onClick={clearSelections} className="clear-button">
-            Clear Selection
-          </button>
-
-          <div className="cut-color-selection">
-            <label>Cut Color: </label>
-            <input
-              type="color"
-              value={selectedCutColor}
-              onChange={(e) => setSelectedCutColor(e.target.value)}
-              className="color-picker"
-            />
-            <div className="predefined-colors">
-              {predefinedColors.map((color) => (
-                <button
-                  key={color}
-                  className={`color-button ${selectedCutColor === color ? "active" : ""}`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setSelectedCutColor(color)}
-                  title={color}
-                />
-              ))}
-            </div>
+      {(selectedNodes.size > 0 || selectedFaces.size > 0) && (
+        <div className="selection-toolbar">
+          <div className="selection-info">
+            {selectedNodes.size > 0 && <span>{selectedNodes.size} nodes</span>}
+            {selectedFaces.size > 0 && <span>{selectedFaces.size} faces</span>}
           </div>
 
           {selectedNodes.size > 0 && (
-            <button onClick={cutSelectedNodes} className="cut-button">
-              Cut Selected Nodes ({selectedNodes.size})
-            </button>
+            <div className="action-controls">
+              <div className="color-group">
+                <label>Cut:</label>
+                <input
+                  type="color"
+                  value={selectedCutColor}
+                  onChange={(e) => setSelectedCutColor(e.target.value)}
+                  className="color-picker"
+                />
+                <div className="predefined-colors">
+                  {predefinedColors.map((color) => (
+                    <button
+                      key={color}
+                      className={`color-button ${selectedCutColor === color ? "active" : ""}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setSelectedCutColor(color)}
+                      title={color}
+                    />
+                  ))}
+                </div>
+                <button onClick={cutSelectedNodes} className="btn btn--danger">
+                  Cut ({selectedNodes.size})
+                </button>
+              </div>
+
+              <div className="color-group">
+                <label>Split:</label>
+                <input
+                  type="color"
+                  value={selectedSplitColor}
+                  onChange={(e) => setSelectedSplitColor(e.target.value)}
+                  className="color-picker"
+                />
+                <div className="predefined-colors">
+                  {predefinedColors.map((color) => (
+                    <button
+                      key={color}
+                      className={`color-button ${selectedSplitColor === color ? "active" : ""}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setSelectedSplitColor(color)}
+                      title={color}
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={splitSelectedNodes}
+                  className="btn btn--warning"
+                >
+                  Split ({selectedNodes.size})
+                </button>
+              </div>
+
+              <button onClick={clearSelections} className="btn btn--default">
+                Clear
+              </button>
+            </div>
           )}
         </div>
-
-        {(selectedNodes.size > 0 || selectedFaces.size > 0) && (
-          <div className="selection-info">
-            {selectedNodes.size > 0 && <span>Nodes: {selectedNodes.size}</span>}
-            {selectedFaces.size > 0 && <span>Faces: {selectedFaces.size}</span>}
-          </div>
-        )}
-
-        {cutOperations.length > 0 && (
-          <div className="cut-operations-history">
-            <h3>Cut Operations:</h3>
-            {cutOperations.map((operation) => (
-              <div key={operation.id} className="cut-operation">
-                <span
-                  className="cut-color-indicator"
-                  style={{ backgroundColor: operation.color }}
-                ></span>
-                <span>
-                  {operation.affectedNodes.size} affected nodes -{" "}
-                  {operation.timestamp}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {isLassoMode && graphType === "3D" && (
-          <div className="lasso-info">
-            Lasso mode active - Click and drag to select nodes (Graph navigation
-            disabled)
-          </div>
-        )}
-      </header>
+      )}
 
       <div className="main-content">
         {showTimeline && (
           <div className="timeline-sidebar">
-            <h3>Operations Timeline (Grandfather Paradox Applies) </h3>
+            <div className="sidebar-header">
+              <h3>Timeline</h3>
+              <small>Grandfather Paradox Applies</small>
+            </div>
             <div className="timeline-list">
               {operationsHistory.map((operation, index) => (
                 <div
                   key={operation.id}
                   className={`timeline-item ${index === currentOperationIndex ? "active" : ""}`}
-                  style={{
-                    opacity: isReplayingOperation ? 0.6 : 1,
-                  }}
+                  style={{ opacity: isReplayingOperation ? 0.6 : 1 }}
                   onClick={() =>
                     !isReplayingOperation && replayToOperation(index)
                   }
                 >
-                  <div className="timeline-item-description">
-                    {operation.description}
-                  </div>
-                  <div className="timeline-item-timestamp">
-                    {new Date(operation.timestamp).toLocaleString()}
-                  </div>
-                  <div className="timeline-item-type">
-                    Type: {operation.type}
+                  <div className="timeline-content">
+                    <div className="timeline-description">
+                      {operation.description}
+                    </div>
+                    <div className="timeline-meta">
+                      <span className="timeline-type">{operation.type}</span>
+                      <span className="timeline-time">
+                        {new Date(operation.timestamp).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -940,7 +1073,10 @@ function App() {
 
         <div className="graph-container">
           {loading || isReplayingOperation ? (
-            <p>{loading ? "Loading..." : "Replaying Operation..."}</p>
+            <div className="loading-state">
+              <div className="loading-spinner" />
+              <p>{loading ? "Loading..." : "Replaying Operation..."}</p>
+            </div>
           ) : (
             <>
               <ForceGraphComponent
@@ -982,5 +1118,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
