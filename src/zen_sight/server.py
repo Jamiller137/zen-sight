@@ -72,10 +72,6 @@ def create_app(sight_instance):
 
             operations_history.append(operation_entry)
 
-            # only keep last 100 operations
-            if len(operations_history) > 100:
-                operations_history.pop(0)
-
             return jsonify({"success": True, "operationId": operation_entry["id"]})
 
         except Exception as e:
