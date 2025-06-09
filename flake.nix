@@ -50,37 +50,43 @@
           ]
       );
 
-      devShells.${system}.default = pkgs.mkShell {
-        NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
-          pkgs.stdenv.cc.cc
-          pkgs.libz
-        ];
+      devShells.${system}.default =
+        let
+          devTools = with pkgs; [
+            python3
+            nodejs
+            nodePackages.npm
+            pyright
+            uv
+            hatch
+            jq
+            just
+            ruff
+            zen-mapper.packages.${system}.default
+            self.formatter.${system}
+          ];
+        in
+        pkgs.mkShell {
+          NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+            pkgs.stdenv.cc.cc
+            pkgs.libz
+          ];
 
-        LC_ALL = "en_US.UTF-8";
+          LC_ALL = "en_US.UTF-8";
 
-        buildInputs = [
-          pkgs.nodejs
-          pkgs.nodePackages.npm
-          pkgs.pyright
-          pkgs.uv
-          pkgs.hatch
-          pkgs.jq
-          pkgs.just
-          pkgs.ruff
-          zen-mapper.packages.${system}.default
-          self.formatter.${system}
-        ];
+          buildInputs = devTools;
 
-        shellHook = ''
-          if [ -z ''${NIX_LD+x} ]
-          then
-            export LD_LIBRARY_PATH="$NIX_LD_LIBRARY_PATH"
-          fi
-          echo "Entering zen-sight development environment"
-          uv sync --group dev
-          source .venv/bin/activate
-        '';
-      };
+          shellHook = ''
+            if [ -z ''${NIX_LD+x} ]
+            then
+              export LD_LIBRARY_PATH="$NIX_LD_LIBRARY_PATH"
+            fi
+            echo "Entering zen-sight development environment"
+            uv sync --group dev
+            source .venv/bin/activate
+            export PATH="${pkgs.lib.makeBinPath devTools}:$PATH"
+          '';
+        };
 
       apps.${system}.default = {
         type = "app";
