@@ -1,6 +1,6 @@
 [project]
 name = "zen-sight"
-version = "0.1.0"
+version = "0.1.1"
 description = "A 3D simplicial complex visualizer"
 readme = "README.md"
 requires-python = ">=3.11"
