@@ -9,7 +9,6 @@ dependencies = [
   "flask-cors>=5.0.0",
   "networkx>=3.4.2",
   "numpy>=2.2.5",
-  "scikit-learn>=1.6.0",
   "zen-mapper>=0.3.0",
 ]
 
@@ -20,6 +19,9 @@ dev = [
     "ruff", 
     "mypy",
     "hatch",
+    "scikit-learn",
+    "networkx",
+    "matplotlib",
 ]
 docs = [
     "sphinx",
