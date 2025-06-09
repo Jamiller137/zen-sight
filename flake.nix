@@ -2,80 +2,89 @@
   description = "Simplicial Complex Visualizations";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    zen-mapper = {
+      url = "github:zen-mapper/zen-mapper";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
+  outputs =
+    { self
+    , nixpkgs
+    , zen-mapper
+    ,
+    }:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+    in
+    {
+      formatter.${system} = pkgs.alejandra;
 
-        pythonVersion = pkgs.python312;
+      packages.${system}.default = pkgs.python3Packages.callPackage ./nix/zen-sight.nix {
+        zen-mapper = zen-mapper.packages.${system}.default;
+      };
 
-        pythonPackages = ps: with ps; [
-          numpy
-          scikit-learn
-          matplotlib
-          networkx
-          flask
-          flask-cors
-          numba
-          setuptools
-          wheel
-          pip
+      overlays.default = import ./nix/overlay.nix {
+        zen-mapper-flake = zen-mapper;
+      };
+
+      templates.default = {
+        path = ./nix/templates/minimal;
+        description = "A minimal flake loading zen-sight";
+      };
+
+      checks.${system} = builtins.listToAttrs (
+        map
+          (python: {
+            name = python;
+            value = pkgs."${python}".pkgs.callPackage ./nix/zen-sight.nix {
+              zen-mapper = zen-mapper.packages.${system}.default;
+            };
+          })
+          [
+            "python313"
+            "python312"
+            "python311"
+          ]
+      );
+
+      devShells.${system}.default = pkgs.mkShell {
+        NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+          pkgs.stdenv.cc.cc
+          pkgs.libz
         ];
 
-        pythonEnv = pythonVersion.withPackages pythonPackages;
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
-            pythonEnv
-            pkgs.nodejs
-            pkgs.nodePackages.npm
-            pkgs.uv
-            pkgs.ruff
-            pkgs.just
-          ];
+        LC_ALL = "en_US.UTF-8";
 
-          NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
-            pkgs.stdenv.cc.cc
-            pkgs.libz
-          ];
+        buildInputs = [
+          pkgs.nodejs
+          pkgs.nodePackages.npm
+          pkgs.pyright
+          pkgs.uv
+          pkgs.hatch
+          pkgs.jq
+          pkgs.just
+          pkgs.ruff
+          zen-mapper.packages.${system}.default
+          self.formatter.${system}
+        ];
 
-          NIX_LD = pkgs.lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
+        shellHook = ''
+          if [ -z ''${NIX_LD+x} ]
+          then
+            export LD_LIBRARY_PATH="$NIX_LD_LIBRARY_PATH"
+          fi
+          echo "Entering zen-sight development environment"
+          uv sync --group dev
+          source .venv/bin/activate
+        '';
+      };
 
-          shellHook = ''
-            echo "Entering zen-sight development environment"
-
-            if [ ! -d ".venv" ]; then
-              ${pkgs.uv}/bin/uv venv -p ${pythonVersion}/bin/python .venv
-            fi
-            source .venv/bin/activate
-
-            ${pkgs.uv}/bin/uv pip install zen-mapper==0.3.0
-            ${pkgs.uv}/bin/uv pip install -e .
-          '';
-        };
-
-        packages.default = pkgs.python312Packages.buildPythonPackage {
-          pname = "zen-sight";
-          version = "0.1.3";
-          src = ./.;
-
-          nativeBuildInputs = [ pkgs.nodejs ];
-
-          propagatedBuildInputs = pythonPackages pkgs.python312Packages;
-        };
-
-        apps.default = flake-utils.lib.mkApp {
-          drv = self.packages.${system}.default;
-          name = "zen-sight";
-        };
-      }
-    );
+      apps.${system}.default = {
+        type = "app";
+        program = "${self.packages.${system}.default}/bin/zen-sight";
+      };
+    };
 }
-
