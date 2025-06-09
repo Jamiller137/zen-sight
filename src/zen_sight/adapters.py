@@ -1,14 +1,16 @@
 from zen_sight import Sight
 import networkx as nx
-from zen_mapper import MapperResult
+from zen_mapper.types import MapperResult
+
 
 def vis_nx(
-        G: nx.Graph, 
-        rel_size: float = 3, 
-        link_color: str = "#000000", 
-        link_width: float = 2, 
-        bg_color: str = "#f2f2f2",
-        port: int = 5050):
+    G: nx.Graph,
+    rel_size: float = 3,
+    link_color: str = "#000000",
+    link_width: float = 2,
+    bg_color: str = "#f2f2f2",
+    port: int = 5050,
+):
 
     nodes = []
     links = []
@@ -51,14 +53,14 @@ def vis_zen_mapper(result: MapperResult, port: int = 5050):
     links = []
     faces = []
 
-    for i in result.nerve.get_simplices(dim=0):
+    for i in result.nerve[0]:
         nodes.append(
             {
                 "id": f"{i[0]}",
                 "name": f"Node {i[0]}",
             }
         )
-    for edge in result.nerve.get_simplices(dim=1):
+    for edge in result.nerve[1]:
         links.append(
             {
                 "source": f"{edge[0]}",
@@ -66,7 +68,8 @@ def vis_zen_mapper(result: MapperResult, port: int = 5050):
             }
         )
 
-    faces = result.nerve.get_simplices(dim=2)
+    for face in result.nerve[2]:
+        faces.append(face)
 
     sight = Sight()
 
@@ -78,9 +81,11 @@ def vis_zen_mapper(result: MapperResult, port: int = 5050):
         {
             "nodeAutoColorBy": "group",
             "nodeRelSize": 4,
+            "nodeOpacity": 1,
             "nodeLabel": "name",
             "linkColor": "#000000",
             "linkWidth": 1,
+            "linkOpacity": 1,
             "backgroundColor": "#f2f2f2",
             # Simplex appearance: alpha is for 2D version and will be ignored
             # in favor of faceOpacity for 3D
