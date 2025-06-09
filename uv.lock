@@ -344,6 +344,18 @@ wheels = [
 ]
 
 [[package]]
+name = "zen-mapper"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bf/73/f1c048b946a53c2eea3885a507f52bcc967ba8b3ca526e8d5f9b6dbac4b1/zen_mapper-0.2.0.tar.gz", hash = "sha256:9f22208501ed888ca4e6488080bd724af56c07a3189df94205c2de30acc74035", size = 75976, upload-time = "2024-12-29T06:01:11.898Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/25/b4/877d4d1802c6b06a7fd73ea3d81715e8629015918b987d37c2acc37cd432/zen_mapper-0.2.0-py3-none-any.whl", hash = "sha256:756aa4d37666a678e629532539fb14a6b9f3164293cbf2cc3904a80810364331", size = 6345, upload-time = "2024-12-29T06:01:09.462Z" },
+]
+
+[[package]]
 name = "zen-sight"
 version = "0.1.0"
 source = { virtual = "." }
@@ -353,6 +365,7 @@ dependencies = [
     { name = "numba" },
     { name = "numpy" },
     { name = "pynvim" },
+    { name = "zen-mapper" },
 ]
 
 [package.metadata]
@@ -362,4 +375,5 @@ requires-dist = [
     { name = "numba", specifier = ">=0.61.2" },
     { name = "numpy", specifier = ">=2.2.5" },
     { name = "pynvim", specifier = ">=0.5.2" },
+    { name = "zen-mapper", specifier = ">=0.2.0" },
 ]

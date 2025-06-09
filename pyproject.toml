@@ -10,4 +10,5 @@ dependencies = [
   "numba>=0.61.2",
   "numpy>=2.2.5",
   "pynvim>=0.5.2",
+  "zen-mapper>=0.2.0",
 ]

@@ -1,3 +1,9 @@
-from .visualization.renderer import SimplexTreeVisualizer
+"""
+zen-sight: Simplicial Complex Visualizations
+"""
 
-__all__ = ["SimplexTreeVisualizer"]
+from .sight import Sight
+
+__version__ = "0.2.0"
+__all__ = ["Sight"]
+
