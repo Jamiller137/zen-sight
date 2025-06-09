@@ -81,10 +81,9 @@
             then
               export LD_LIBRARY_PATH="$NIX_LD_LIBRARY_PATH"
             fi
-            echo "Entering zen-sight development environment"
             uv sync --group dev
-            source .venv/bin/activate
             export PATH="${pkgs.lib.makeBinPath devTools}:$PATH"
+            source .venv/bin/activate
           '';
         };
 
