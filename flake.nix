@@ -4,23 +4,18 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-
-    zen-mapper.url = "github:Jamiller137/zen-mapper/add_simplex_tree"; 
-    zen-mapper.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, flake-utils, zen-mapper, ... }:
+  outputs = { self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ zen-mapper.overlays.default ];
         };
 
         pythonVersion = pkgs.python312;
 
         pythonPackages = ps: with ps; [
-          zen-mapper
           numpy
           scikit-learn
           matplotlib
@@ -44,7 +39,6 @@
             pkgs.uv
             pkgs.ruff
             pkgs.just
-            zen-mapper.packages.${system}.default
           ];
 
           NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
@@ -62,7 +56,7 @@
             fi
             source .venv/bin/activate
 
-            ${pkgs.uv}/bin/uv pip install git+https://github.com/Jamiller137/zen-mapper.git@add_simplex_tree
+            ${pkgs.uv}/bin/uv pip install zen-mapper==0.3.0
             ${pkgs.uv}/bin/uv pip install -e .
           '';
         };
