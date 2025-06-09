@@ -69,7 +69,7 @@
 
         packages.default = pkgs.python312Packages.buildPythonPackage {
           pname = "zen-sight";
-          version = "0.1.0";
+          version = "0.1.3";
           src = ./.;
 
           nativeBuildInputs = [ pkgs.nodejs ];
