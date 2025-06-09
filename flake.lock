@@ -1,34 +1,16 @@
 {
   "nodes": {
-    "flake-utils": {
-      "inputs": {
-        "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1747920628,
-        "narHash": "sha256-IlAuXnIi+ZmyS89tt1YOFDCv7FKs9bNBHd3MXMp8PxE=",
-        "owner": "NixOS",
+        "lastModified": 1749401433,
+        "narHash": "sha256-HXIQzULIG/MEUW2Q/Ss47oE3QrjxvpUX7gUl4Xp6lnc=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "e314d5c6d3b3a0f40ec5bcbc007b0cbe412f48ae",
+        "rev": "08fcb0dcb59df0344652b38ea6326a2d8271baff",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
+        "owner": "nixos",
         "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
         "type": "github"
@@ -36,24 +18,8 @@
     },
     "root": {
       "inputs": {
-        "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
         "zen-mapper": "zen-mapper"
-      }
-    },
-    "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
       }
     },
     "zen-mapper": {
@@ -63,16 +29,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1745107900,
-        "narHash": "sha256-EQ1k6BfPauKcO3SEwJuApfPebWRBfxTS5ZVBT37c/ls=",
-        "owner": "Jamiller137",
+        "lastModified": 1748925372,
+        "narHash": "sha256-adsWR87g1osZpUTLBuhK6ZK3qSVPeXpAmo7rwsZ+OZQ=",
+        "owner": "zen-mapper",
         "repo": "zen-mapper",
-        "rev": "7b2282c5bdc4f5e9b27e66d8e158aec9cab75826",
+        "rev": "5417dd7cad34d60b2fc33350168c4c34cecf73a0",
         "type": "github"
       },
       "original": {
-        "owner": "Jamiller137",
-        "ref": "add_simplex_tree",
+        "owner": "zen-mapper",
         "repo": "zen-mapper",
         "type": "github"
       }
