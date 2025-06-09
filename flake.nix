@@ -82,8 +82,8 @@
               export LD_LIBRARY_PATH="$NIX_LD_LIBRARY_PATH"
             fi
             uv sync --group dev
-            export PATH="${pkgs.lib.makeBinPath devTools}:$PATH"
             source .venv/bin/activate
+            export PATH="${pkgs.lib.makeBinPath devTools}:$PATH"
           '';
         };
 
