@@ -5,9 +5,13 @@ A (work in progress) simplicial complex visualization python package which combi
 ## Features
 
 - **🎯 Interactive Visualizations**: 2D and 3D simplicial complex rendering using react-force-graph and Three.js
+![moving-ezgif com-resize](https://github.com/user-attachments/assets/9c6b331f-b009-49d4-bb13-b894088868f8)
 - **🖱️ Selection Functionality**: Single, multi, and lasso selection tools for nodes
+![splitting-ezgif com-resize](https://github.com/user-attachments/assets/9ce47297-88a0-481b-813c-34d04a61cfdd)
 - **✂️ Graph Operations**: Node cutting and splitting.
 - **⏱️ Timeline Replay**: Replay and review graph operations with the timeline
+![timeline-ezgif com-resize](https://github.com/user-attachments/assets/8d89e439-5d39-4757-9294-316523b1a959)
+
 - **🔗 Integration**: Built-in adapters for NetworkX and Zen Mapper
 
 ---
