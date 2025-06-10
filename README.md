@@ -5,12 +5,18 @@ A (work in progress) simplicial complex visualization python package which combi
 ## Features
 
 - **🎯 Interactive Visualizations**: 2D and 3D simplicial complex rendering using react-force-graph and Three.js
+
 ![moving-ezgif com-resize](https://github.com/user-attachments/assets/9c6b331f-b009-49d4-bb13-b894088868f8)
+
 - **🖱️ Selection Functionality**: Single, multi, and lasso selection tools for nodes
+
 ![splitting-ezgif com-resize](https://github.com/user-attachments/assets/9ce47297-88a0-481b-813c-34d04a61cfdd)
+
 - **✂️ Graph Operations**: Node cutting and splitting.
 - **⏱️ Timeline Replay**: Replay and review graph operations with the timeline
+
 ![timeline-ezgif com-resize](https://github.com/user-attachments/assets/8d89e439-5d39-4757-9294-316523b1a959)
+
 
 - **🔗 Integration**: Built-in adapters for NetworkX and Zen Mapper
 
@@ -23,7 +29,7 @@ pip install zen-sight
 
 --- 
 
-### Quick Start
+## Quick(ish) Start
 Creating Simplicial Complexes
 ```python
 from zen_sight import Sight
@@ -141,3 +147,84 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+
+## The ```Sight``` Class:
+
+Currently, zen-sight comes with a ```Sight``` Class which acts as the main interface for creating customized visualizations. Sight() comes with a .show() method which will create the app routes and initialize the visualization on port 5050. This is hard-coded currently and needs to be updated...
+
+Here is a breakdown of the datastructure for Sight()
+
+```mermaid +render +width:100%
+graph TD
+    A["<b>Sight</b><br/><i>class</i>"] --> C["<b>nodes</b><br/><i>List[Dict]</i>"]
+    A --> D["<b>links</b><br/><i>List[Dict]</i>"]
+    A --> E["<b>faces</b><br/><i>List[Dict]</i>"]
+    A --> F["<b>config</b><br/><i>Dict</i>"]
+
+    C --> C1["<b>List[Dict]:</b><br/>Node objects with 'id' field<br/>"]
+
+    D --> D1["<b>List[Dict]:</b><br/>Link objects with 'source'<br/>and 'target' fields<br/>Represents graph edges"]
+
+    E --> E1["<b>List[Dict]:</b><br/>Face objects with 'nodes'<br/>field containing 3 node IDs<br/>Represents triangular faces"]
+
+    F --> F1["<b>Dict:</b><br/>react-force-graph config"]
+
+
+
+    style A fill:#ffcd00,stroke:#e6b800,stroke-width:4px,color:#0f1419
+    style C fill:#ff8cc8,stroke:#1a1f2e,stroke-width:3px,color:#0f1419
+    style D fill:#51cf66,stroke:#1a1f2e,stroke-width:3px,color:#0f1419
+    style E fill:#ffa94d,stroke:#1a1f2e,stroke-width:3px,color:#0f1419
+    style F fill:#74c0fc,stroke:#1a1f2e,stroke-width:3px,color:#0f1419
+    style C1 fill:#1a1f2e,stroke:#ff8cc8,stroke-width:2px,color:#f8f9fa
+    style D1 fill:#1a1f2e,stroke:#51cf66,stroke-width:2px,color:#f8f9fa
+    style E1 fill:#1a1f2e,stroke:#ffa94d,stroke-width:2px,color:#f8f9fa
+    style F1 fill:#1a1f2e,stroke:#74c0fc,stroke-width:2px,color:#f8f9fa
+```
+- Note: Currently faces is a List[Tuple] made up of 3-tuples of nodes incident with the face
+
+### Customization
+
+### API Table:
+Zen Sight partially acts as a wrapper for [react-force-graph-3D](https://github.com/vasturiano/react-force-graph#api-reference). Here is an incomplete table of relevant variables/parameters:
+
+| Property              | Type               | Default                    | Description                            | Category         |
+| --------------------- | ------------------ | -------------------------- | -------------------------------------- | ---------------- |
+| **graphData**         | object             | `{ nodes: [], links: [] }` | Graph data structure                   | Data Input       |
+| **backgroundColor**   | string             | "#000011"                  | Background color                       | Container Layout |
+| **nodeId**            | string/func        | `id`                       | Node object accessor for unique ID     | Node Data        |
+| **nodeVal**           | number/string/func | `val`                      | Node object accessor for numeric value | Node Data        |
+| **nodeLabel**         | string/func        | `name`                     | Node object accessor for label         | Node Styling     |
+| **nodeDesc**          | string/func        | `desc`                     | Node object accessor for description   | Node Styling     |
+| **nodeColor**         | string/func        | `color`                    | Node color accessor                    | Node Styling     |
+| **nodeAutoColorBy**   | string/func        | -                          | Auto-color nodes by property           | Node Styling     |
+| **nodeOpacity**       | number             | 0.75                       | Node opacity value                     | Node Styling     |
+| **nodeRelSize**       | number             | 4                          | Ratio of node sphere volume            | Node Styling     |
+| **linkSource**        | string/func        | `source`                   | Link object accessor for source        | Link Data        |
+| **linkTarget**        | string/func        | `target`                   | Link object accessor for target        | Link Data        |
+| **linkLabel**         | string/func        | `name`                     | Link object accessor for label         | Link Styling     |
+| **linkDesc**          | string/func        | `desc`                     | Link object accessor for description   | Link Styling     |
+| **linkColor**         | string/func        | `color`                    | Link color accessor                    | Link Styling     |
+| **linkAutoColorBy**   | string/func        | -                          | Auto-color links by property           | Link Styling     |
+| **linkOpacity**       | number             | 0.2                        | Link line opacity                      | Link Styling     |
+| **linkWidth**         | number/func        | 0                          | Link line width                        | Link Styling     |
+| **linkResolution**    | number             | 6                          | Link cylinder geometric resolution     | Link Styling     |
+| **linkCurvature**     | number/func        | 0                          | Link curvature (0=straight, 1=full)    | Link Styling     |
+| **linkCurveRotation** | number/func        | 0                          | Link curve rotation in radians         | Link Styling     |
+
+
+# Future Work
+
+- Patch Bugs, Finalize API, & Organize
+  - Apply It!
+- Implement more adapters (e.g. GHUDI Simplex Trees)
+- Include 3-Simplices and allow for simplex collapses
+- Include more customization options for faces/tetrahedra
+- Implement better splitting functionality
+- Create a Filtration Visualizer
+  - Backend can already do this with a bit of work
+- Could port Zen Sight to also work in VR
+
+
+
