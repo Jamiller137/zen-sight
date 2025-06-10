@@ -1,6 +1,6 @@
 # Zen Sight
 
-A (work in progress) simplicial complex visualization python package which combines a React frontend with a Python backend to provide interactive 2D and 3D visualizations.
+A (work in progress) simplicial complex visualization python package made with React and a Python backend.
 
 ## Features
 
