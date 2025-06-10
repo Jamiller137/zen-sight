@@ -17,7 +17,7 @@
 
 buildPythonPackage rec {
   pname = "zen-sight";
-  version = "0.1.3";
+  version = "0.1.5";
   pyproject = true;
 
   src = lib.cleanSource ./../.;
