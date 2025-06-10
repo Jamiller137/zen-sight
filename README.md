@@ -224,6 +224,7 @@ Zen Sight partially acts as a wrapper for [react-force-graph-3D](https://github.
 - Implement better splitting functionality
 - Create a Filtration Visualizer
   - Backend can already do this with a bit of work
+- Create a Figure-Generation Mode for export
 - Could port Zen Sight to also work in VR
 
 
