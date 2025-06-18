@@ -67,8 +67,6 @@ def main():
             "linkColor": "#000000",
             "linkWidth": 2,
             "backgroundColor": "#ffffff",
-            # Simplex appearance: alpha is for 2D version and will be ignored
-            # in favor of faceOpacity for 3D
             "faceFillColor": "rgba(52, 152, 219, 0.3)",
             "faceStrokeColor": "rgba(52, 152, 219, 0.5)",
             "faceStrokeWidth": 1,
