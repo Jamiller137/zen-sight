@@ -3,7 +3,7 @@ import { operationsAPI } from "../services/api";
 
 export const useOperations = () => {
   const [cutOperations, setCutOperations] = useState([]);
-  const [splitOperations, setSplitOperations] = useState([]);
+  const [dupOperations, setDupOperations] = useState([]);
   const [affectedNodes, setAffectedNodes] = useState(new Set());
   const [operationsHistory, setOperationsHistory] = useState([]);
   const [currentOperationIndex, setCurrentOperationIndex] = useState(-1);
@@ -70,8 +70,8 @@ export const useOperations = () => {
   return {
     cutOperations,
     setCutOperations,
-    splitOperations,
-    setSplitOperations,
+    dupOperations,
+    setDupOperations,
     affectedNodes,
     setAffectedNodes,
     operationsHistory,

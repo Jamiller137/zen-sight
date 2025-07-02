@@ -16,7 +16,7 @@ import "./styles/App.css";
 function App() {
   const [showTimeline, setShowTimeline] = useState(false);
   const [selectedCutColor, setSelectedCutColor] = useState("#ff6969");
-  const [selectedSplitColor, setSelectedSplitColor] = useState("#69ff69");
+  const [selectedDupColor, setSelectedDupColor] = useState("#69ff69");
 
   const graphRef = useRef();
 
@@ -48,8 +48,8 @@ function App() {
   const {
     cutOperations,
     setCutOperations,
-    splitOperations,
-    setSplitOperations,
+    dupOperations,
+    setDupOperations,
     affectedNodes,
     setAffectedNodes,
     operationsHistory,
@@ -69,7 +69,7 @@ function App() {
     handleOverlayMouseUp,
   } = useLasso(selectionMode, graphType, graphData, setSelectedNodes, graphRef);
 
-  const { cutSelectedNodes, splitSelectedNodes } = useGraphOperations(
+  const { cutSelectedNodes, dupSelectedNodes } = useGraphOperations(
     graphData,
     setGraphData,
     selectedNodes,
@@ -77,10 +77,10 @@ function App() {
     setSelectedFaces,
     setAffectedNodes,
     setCutOperations,
-    setSplitOperations,
+    setDupOperations,
     saveOperation,
     selectedCutColor,
-    selectedSplitColor,
+    selectedDupColor,
   );
 
   const handleReplayToOperation = async (operationIndex) => {
@@ -118,11 +118,11 @@ function App() {
         selectedNodes={selectedNodes}
         selectedFaces={selectedFaces}
         selectedCutColor={selectedCutColor}
-        selectedSplitColor={selectedSplitColor}
+        selectedDupColor={selectedDupColor}
         onCutColorChange={setSelectedCutColor}
-        onSplitColorChange={setSelectedSplitColor}
+        onDupColorChange={setSelectedDupColor}
         onCutNodes={cutSelectedNodes}
-        onSplitNodes={splitSelectedNodes}
+        onDupNodes={dupSelectedNodes}
         onClearSelections={clearSelections}
       />
 
@@ -146,7 +146,7 @@ function App() {
           selectedNodes={selectedNodes}
           selectedFaces={selectedFaces}
           cutOperations={cutOperations}
-          splitOperations={splitOperations}
+          dupOperations={dupOperations}
           isLassoMode={isLassoMode}
           lassoPath={lassoPath}
           isDrawing={isDrawing}

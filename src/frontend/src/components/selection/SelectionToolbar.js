@@ -6,11 +6,11 @@ const SelectionToolbar = ({
   selectedNodes,
   selectedFaces,
   selectedCutColor,
-  selectedSplitColor,
+  selectedDupColor,
   onCutColorChange,
-  onSplitColorChange,
+  onDupColorChange,
   onCutNodes,
-  onSplitNodes,
+  onDupNodes,
   onClearSelections,
 }) => {
   if (selectedNodes.size === 0 && selectedFaces.size === 0) {
@@ -28,11 +28,11 @@ const SelectionToolbar = ({
         <ActionControls
           selectedNodes={selectedNodes}
           selectedCutColor={selectedCutColor}
-          selectedSplitColor={selectedSplitColor}
+          selectedDupColor={selectedDupColor}
           onCutColorChange={onCutColorChange}
-          onSplitColorChange={onSplitColorChange}
+          onDupColorChange={onDupColorChange}
           onCutNodes={onCutNodes}
-          onSplitNodes={onSplitNodes}
+          onDupNodes={onDupNodes}
           onClearSelections={onClearSelections}
         />
       )}

@@ -5,11 +5,11 @@ import { PREDEFINED_COLORS } from "../../utils/constants";
 const ActionControls = ({
   selectedNodes,
   selectedCutColor,
-  selectedSplitColor,
+  selectedDupColor,
   onCutColorChange,
-  onSplitColorChange,
+  onDupColorChange,
   onCutNodes,
-  onSplitNodes,
+  onDupNodes,
   onClearSelections,
 }) => {
   return (
@@ -27,14 +27,14 @@ const ActionControls = ({
       </div>
 
       <div className="color-group">
-        <label>Split:</label>
+        <label>Duplicate:</label>
         <ColorPicker
-          selectedColor={selectedSplitColor}
+          selectedColor={selectedDupColor}
           predefinedColors={PREDEFINED_COLORS}
-          onColorChange={onSplitColorChange}
+          onColorChange={onDupColorChange}
         />
-        <button onClick={onSplitNodes} className="btn btn--warning">
-          Split ({selectedNodes.size})
+        <button onClick={onDupNodes} className="btn btn--warning">
+          Duplicate ({selectedNodes.size})
         </button>
       </div>
 

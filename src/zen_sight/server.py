@@ -172,10 +172,10 @@ def create_app(sight_instance):
                 if not any(node_id in node_ids_to_cut for node_id in face["nodes"])
             ]
 
-        elif operation["type"] == "split_nodes":
+        elif operation["type"] == "duplicate_nodes":
             original_node_ids = set(operation["data"]["originalNodeIds"])
             duplicated_node_ids = operation["data"]["duplicatedNodeIds"]
-            split_color = operation["data"].get("splitColor", "#69ff69")
+            duplicate_color = operation["data"].get("duplicateColor", "#69ff69")
 
             node_id_mapping = {}
             for i, original_id in enumerate(operation["data"]["originalNodeIds"]):
@@ -183,7 +183,7 @@ def create_app(sight_instance):
                     node_id_mapping[original_id] = duplicated_node_ids[i]
 
             for original_id in original_node_ids:
-                affected_nodes_colors[original_id] = split_color
+                affected_nodes_colors[original_id] = duplicate_color
 
             for original_id in original_node_ids:
                 original_node = next(
@@ -194,7 +194,7 @@ def create_app(sight_instance):
                     duplicated_id = node_id_mapping[original_id]
                     duplicated_node = json.loads(json.dumps(original_node))  # Deep copy
                     duplicated_node["id"] = duplicated_id
-                    duplicated_node["color"] = split_color
+                    duplicated_node["color"] = duplicate_color
 
                     # Offset position slightly for visibility
                     if "x" in duplicated_node:
@@ -205,7 +205,7 @@ def create_app(sight_instance):
                         duplicated_node["z"] += hash(duplicated_id) % 40 - 20
 
                     graph_data["nodes"].append(duplicated_node)
-                    affected_nodes_colors[duplicated_id] = split_color
+                    affected_nodes_colors[duplicated_id] = duplicate_color
 
             new_links = []
             for link in graph_data["links"]:
@@ -254,7 +254,7 @@ def create_app(sight_instance):
                             new_face_nodes.append(node_id)
 
                     new_face = json.loads(json.dumps(face))
-                    new_face["id"] = f"{face['id']}_split_{len(new_faces)}"
+                    new_face["id"] = f"{face['id']}_duplicate_{len(new_faces)}"
                     new_face["nodes"] = new_face_nodes
                     new_faces.append(new_face)
 

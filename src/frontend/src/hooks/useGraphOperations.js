@@ -8,10 +8,10 @@ export const useGraphOperations = (
   setSelectedFaces,
   setAffectedNodes,
   setCutOperations,
-  setSplitOperations,
+  setDupOperations,
   saveOperation,
   selectedCutColor,
-  selectedSplitColor,
+  selectedDupColor,
 ) => {
   const cutSelectedNodes = useCallback(async () => {
     if (selectedNodes.size === 0) return;
@@ -135,7 +135,7 @@ export const useGraphOperations = (
     selectedCutColor,
   ]);
 
-  const splitSelectedNodes = useCallback(async () => {
+  const dupSelectedNodes = useCallback(async () => {
     if (selectedNodes.size === 0) return;
 
     const selectedNodeIds = Array.from(selectedNodes);
@@ -145,7 +145,7 @@ export const useGraphOperations = (
     // Apply color to selected nodes
     const newNodes = graphData.nodes.map((node) => {
       if (selectedNodes.has(node.id)) {
-        return { ...node, color: selectedSplitColor };
+        return { ...node, color: selectedDupColor };
       }
       return node;
     });
@@ -156,11 +156,11 @@ export const useGraphOperations = (
         (node) => node.id === originalId,
       );
       if (originalNode) {
-        const duplicatedId = `${originalId}_split_${Date.now()}`;
+        const duplicatedId = `${originalId}_duplicate_${Date.now()}`;
         const duplicatedNode = {
           ...originalNode,
           id: duplicatedId,
-          color: selectedSplitColor,
+          color: selectedDupColor,
           x: (originalNode.x || 0) + (Math.random() - 0.5) * 20,
           y: (originalNode.y || 0) + (Math.random() - 0.5) * 20,
           z: (originalNode.z || 0) + (Math.random() - 0.5) * 20,
@@ -242,21 +242,21 @@ export const useGraphOperations = (
 
         newFaces.push({
           ...face,
-          id: `${face.id}_split_${Date.now()}`,
+          id: `${face.id}_duplicate_${Date.now()}`,
           nodes: newFaceNodes,
         });
       }
     });
 
-    const splitOperation = {
+    const dupOperation = {
       id: Date.now(),
-      color: selectedSplitColor,
+      color: selectedDupColor,
       originalNodes: new Set(selectedNodeIds),
       duplicatedNodes: new Set(duplicatedNodeIds),
       timestamp: new Date().toLocaleTimeString(),
     };
 
-    setSplitOperations((prev) => [...prev, splitOperation]);
+    setDupOperations((prev) => [...prev, dupOperation]);
 
     // Create a completely fresh graph data object
     const newGraphData = {
@@ -279,28 +279,32 @@ export const useGraphOperations = (
 
     setTimeout(
       () =>
-        saveOperation("split_nodes", `Split ${selectedNodeIds.length} nodes`, {
-          originalNodeIds: selectedNodeIds,
-          duplicatedNodeIds: duplicatedNodeIds,
-          splitColor: selectedSplitColor,
-          affectedNodeIds: [...selectedNodeIds, ...duplicatedNodeIds],
-        }),
+        saveOperation(
+          "duplicate_nodes",
+          `Duplicated ${selectedNodeIds.length} nodes`,
+          {
+            originalNodeIds: selectedNodeIds,
+            duplicatedNodeIds: duplicatedNodeIds,
+            dupColor: selectedDupColor,
+            affectedNodeIds: [...selectedNodeIds, ...duplicatedNodeIds],
+          },
+        ),
       500,
     );
   }, [
     selectedNodes,
     graphData,
-    setSplitOperations,
+    setDupOperations,
     setGraphData,
     setAffectedNodes,
     setSelectedNodes,
     setSelectedFaces,
     saveOperation,
-    selectedSplitColor,
+    selectedDupColor,
   ]);
 
   return {
     cutSelectedNodes,
-    splitSelectedNodes,
+    dupSelectedNodes,
   };
 };

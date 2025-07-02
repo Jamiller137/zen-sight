@@ -22,7 +22,7 @@ const GraphContainer = forwardRef(
       selectedNodes,
       selectedFaces,
       cutOperations,
-      splitOperations,
+      dupOperations,
       isLassoMode,
       lassoPath,
       isDrawing,
@@ -62,9 +62,9 @@ const GraphContainer = forwardRef(
           return graphConfig.selectedNodeColor || "#ff6969";
         }
 
-        for (let i = splitOperations.length - 1; i >= 0; i--) {
-          if (splitOperations[i].duplicatedNodes.has(node.id)) {
-            return splitOperations[i].color;
+        for (let i = dupOperations.length - 1; i >= 0; i--) {
+          if (dupOperations[i].duplicatedNodes.has(node.id)) {
+            return dupOperations[i].color;
           }
         }
 
@@ -76,7 +76,7 @@ const GraphContainer = forwardRef(
 
         return node.color || graphConfig.nodeColor || "#696969";
       },
-      [selectedNodes, cutOperations, splitOperations, graphConfig],
+      [selectedNodes, cutOperations, dupOperations, graphConfig],
     );
 
     const getNodeSize = useCallback(
