@@ -10,6 +10,8 @@ export const useGraphOperations = (
   setCutOperations,
   setSplitOperations,
   saveOperation,
+  selectedCutColor,
+  selectedSplitColor,
 ) => {
   const cutSelectedNodes = useCallback(async () => {
     if (selectedNodes.size === 0) return;
@@ -48,34 +50,59 @@ export const useGraphOperations = (
 
     const cutOperation = {
       id: Date.now(),
-      color: "#ff6969", // This should come from props
+      color: selectedCutColor,
       affectedNodes: new Set(newAffectedNodes),
       timestamp: new Date().toLocaleTimeString(),
     };
 
     setCutOperations((prev) => [...prev, cutOperation]);
 
-    // Remove selected nodes and their connections
-    const newNodes = graphData.nodes.filter(
-      (node) => !selectedNodes.has(node.id),
-    );
-    const newLinks = graphData.links.filter((link) => {
-      const sourceId =
-        typeof link.source === "object" ? link.source.id : link.source;
-      const targetId =
-        typeof link.target === "object" ? link.target.id : link.target;
-      return !selectedNodes.has(sourceId) && !selectedNodes.has(targetId);
-    });
+    // Remove selected nodes and apply colors to affected nodes
+    const newNodes = graphData.nodes
+      .filter((node) => !selectedNodes.has(node.id))
+      .map((node) => {
+        if (newAffectedNodes.has(node.id)) {
+          return { ...node, color: selectedCutColor };
+        }
+        return node;
+      });
+
+    // Normalize links and filter out connections to cut nodes
+    const newLinks = graphData.links
+      .filter((link) => {
+        const sourceId =
+          typeof link.source === "object" ? link.source.id : link.source;
+        const targetId =
+          typeof link.target === "object" ? link.target.id : link.target;
+        return !selectedNodes.has(sourceId) && !selectedNodes.has(targetId);
+      })
+      .map((link) => {
+        // Normalize link to use string IDs
+        const sourceId =
+          typeof link.source === "object" ? link.source.id : link.source;
+        const targetId =
+          typeof link.target === "object" ? link.target.id : link.target;
+
+        return {
+          ...link,
+          source: sourceId,
+          target: targetId,
+        };
+      });
+
     const newFaces =
       graphData.faces?.filter(
         (face) => !face.nodes.some((nodeId) => selectedNodes.has(nodeId)),
       ) || [];
 
-    setGraphData({
-      nodes: newNodes,
-      links: newLinks,
-      faces: newFaces,
-    });
+    // Create a completely fresh graph data object
+    const newGraphData = {
+      nodes: [...newNodes],
+      links: [...newLinks],
+      faces: [...newFaces],
+    };
+
+    setGraphData(newGraphData);
 
     setAffectedNodes((prev) => {
       const updated = new Set(prev);
@@ -91,7 +118,7 @@ export const useGraphOperations = (
       () =>
         saveOperation("cut_nodes", `Cut ${selectedNodeIds.length} nodes`, {
           nodeIds: selectedNodeIds,
-          cutColor: "#ff6969",
+          cutColor: selectedCutColor,
           affectedNodeIds: Array.from(newAffectedNodes),
         }),
       500,
@@ -105,6 +132,7 @@ export const useGraphOperations = (
     setSelectedNodes,
     setSelectedFaces,
     saveOperation,
+    selectedCutColor,
   ]);
 
   const splitSelectedNodes = useCallback(async () => {
@@ -114,8 +142,15 @@ export const useGraphOperations = (
     const duplicatedNodeIds = [];
     const nodeIdMapping = new Map();
 
-    // Create duplicated nodes
-    const newNodes = [...graphData.nodes];
+    // Apply color to selected nodes
+    const newNodes = graphData.nodes.map((node) => {
+      if (selectedNodes.has(node.id)) {
+        return { ...node, color: selectedSplitColor };
+      }
+      return node;
+    });
+
+    // Create duplicate nodes
     selectedNodeIds.forEach((originalId) => {
       const originalNode = graphData.nodes.find(
         (node) => node.id === originalId,
@@ -125,6 +160,7 @@ export const useGraphOperations = (
         const duplicatedNode = {
           ...originalNode,
           id: duplicatedId,
+          color: selectedSplitColor,
           x: (originalNode.x || 0) + (Math.random() - 0.5) * 20,
           y: (originalNode.y || 0) + (Math.random() - 0.5) * 20,
           z: (originalNode.z || 0) + (Math.random() - 0.5) * 20,
@@ -136,36 +172,63 @@ export const useGraphOperations = (
       }
     });
 
-    // Create new links for duplicated nodes
-    const newLinks = [...graphData.links];
-    graphData.links.forEach((link) => {
-      const sourceId =
-        typeof link.source === "object" ? link.source.id : link.source;
-      const targetId =
-        typeof link.target === "object" ? link.target.id : link.target;
+    // create new links structure
+    const newLinks = [];
 
+    graphData.links.forEach((originalLink) => {
+      const sourceId =
+        typeof originalLink.source === "object"
+          ? originalLink.source.id
+          : originalLink.source;
+      const targetId =
+        typeof originalLink.target === "object"
+          ? originalLink.target.id
+          : originalLink.target;
+
+      // Create a normalized version of the original link
+      const normalizedLink = {
+        ...originalLink,
+        source: sourceId,
+        target: targetId,
+      };
+
+      // keep the original link with normalized IDs
+      newLinks.push(normalizedLink);
+
+      // Create additional links for duplicated nodes
       if (selectedNodes.has(sourceId) && !selectedNodes.has(targetId)) {
-        newLinks.push({
-          ...link,
-          source: nodeIdMapping.get(sourceId),
-          target: targetId,
-        });
+        const duplicatedSourceId = nodeIdMapping.get(sourceId);
+        if (duplicatedSourceId) {
+          newLinks.push({
+            ...normalizedLink,
+            source: duplicatedSourceId,
+            target: targetId,
+          });
+        }
       } else if (!selectedNodes.has(sourceId) && selectedNodes.has(targetId)) {
-        newLinks.push({
-          ...link,
-          source: sourceId,
-          target: nodeIdMapping.get(targetId),
-        });
+        const duplicatedTargetId = nodeIdMapping.get(targetId);
+        if (duplicatedTargetId) {
+          newLinks.push({
+            ...normalizedLink,
+            source: sourceId,
+            target: duplicatedTargetId,
+          });
+        }
       } else if (selectedNodes.has(sourceId) && selectedNodes.has(targetId)) {
-        newLinks.push({
-          ...link,
-          source: nodeIdMapping.get(sourceId),
-          target: nodeIdMapping.get(targetId),
-        });
+        // Link between duplicated nodes
+        const duplicatedSourceId = nodeIdMapping.get(sourceId);
+        const duplicatedTargetId = nodeIdMapping.get(targetId);
+        if (duplicatedSourceId && duplicatedTargetId) {
+          newLinks.push({
+            ...normalizedLink,
+            source: duplicatedSourceId,
+            target: duplicatedTargetId,
+          });
+        }
       }
     });
 
-    // Create new faces for duplicated nodes
+    // Create faces for duplicated nodes
     const newFaces = [...(graphData.faces || [])];
     graphData.faces?.forEach((face) => {
       const hasSelectedNode = face.nodes.some((nodeId) =>
@@ -187,7 +250,7 @@ export const useGraphOperations = (
 
     const splitOperation = {
       id: Date.now(),
-      color: "#69ff69",
+      color: selectedSplitColor,
       originalNodes: new Set(selectedNodeIds),
       duplicatedNodes: new Set(duplicatedNodeIds),
       timestamp: new Date().toLocaleTimeString(),
@@ -195,11 +258,14 @@ export const useGraphOperations = (
 
     setSplitOperations((prev) => [...prev, splitOperation]);
 
-    setGraphData({
-      nodes: newNodes,
-      links: newLinks,
-      faces: newFaces,
-    });
+    // Create a completely fresh graph data object
+    const newGraphData = {
+      nodes: [...newNodes],
+      links: [...newLinks],
+      faces: [...newFaces],
+    };
+
+    setGraphData(newGraphData);
 
     setAffectedNodes((prev) => {
       const updated = new Set(prev);
@@ -216,7 +282,7 @@ export const useGraphOperations = (
         saveOperation("split_nodes", `Split ${selectedNodeIds.length} nodes`, {
           originalNodeIds: selectedNodeIds,
           duplicatedNodeIds: duplicatedNodeIds,
-          splitColor: "#69ff69",
+          splitColor: selectedSplitColor,
           affectedNodeIds: [...selectedNodeIds, ...duplicatedNodeIds],
         }),
       500,
@@ -230,6 +296,7 @@ export const useGraphOperations = (
     setSelectedNodes,
     setSelectedFaces,
     saveOperation,
+    selectedSplitColor,
   ]);
 
   return {

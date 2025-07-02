@@ -42,6 +42,19 @@ def create_app(sight_instance):
                 "links": json.loads(json.dumps(data["data"]["links"])),
                 "faces": json.loads(json.dumps(data["data"].get("faces", []))),
             }
+
+            original_operation = {
+                "id": str(uuid.uuid4()),
+                "timestamp": datetime.now().isoformat(),
+                "type": "original",
+                "description": "Original graph state",
+                "data": {
+                    "nodeCount": len(initial_graph_data["nodes"]),
+                    "linkCount": len(initial_graph_data["links"]),
+                    "faceCount": len(initial_graph_data["faces"]),
+                },
+            }
+            operations_history.append(original_operation)
         return jsonify(data)
 
     @app.route("/api/update-config", methods=["POST"])
@@ -112,8 +125,8 @@ def create_app(sight_instance):
 
             affected_nodes_colors = {}
 
-            # Replay operations up to the index
-            for i in range(min(operation_index + 1, len(operations_history))):
+            # Replay operations ignoring original graph operation up to the index
+            for i in range(1, min(operation_index + 1, len(operations_history))):
                 operation = operations_history[i]
                 current_graph, affected_nodes_colors = apply_operation(
                     current_graph, operation, affected_nodes_colors

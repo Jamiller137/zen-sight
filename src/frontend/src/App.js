@@ -79,6 +79,8 @@ function App() {
     setCutOperations,
     setSplitOperations,
     saveOperation,
+    selectedCutColor,
+    selectedSplitColor,
   );
 
   const handleReplayToOperation = async (operationIndex) => {
