@@ -1,5 +1,10 @@
 .timeline-sidebar {
-  width: 320px;
+  position: fixed;
+  top: 250;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  width: 300px;
   background: white;
   border-right: 1px solid #e9ecef;
   display: flex;

@@ -1,4 +1,9 @@
 .selection-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* z-index to ensure it's on top */
   background: white;
   border-bottom: 1px solid #e9ecef;
   padding: 1rem 2rem;
