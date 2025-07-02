@@ -1,0 +1,45 @@
+/* Import component-specific styles */
+@import '../components/header/Header.css';
+@import '../components/selection/SelectionToolbar.css';
+@import '../components/timeline/Timeline.css';
+@import '../components/graph/GraphContainer.css';
+@import '../components/common/StatusBar.css';
+@import '../components/common/LoadingSpinner.css';
+@import '../components/selection/ColorPicker.css';
+@import '../components/graph/LassoOverlay.css';
+
+/* Global styles and layout */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.App {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  font-family: "Arial", sans-serif;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+
+/* Global responsive styles */
+@media (max-width: 768px) {
+  .App {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .App {
+    font-size: 13px;
+  }
+}

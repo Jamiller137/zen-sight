@@ -1,0 +1,126 @@
+.graph-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* Loading state styles */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+  background: #f8f9fa;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #6c757d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Lasso overlay styles */
+.lasso-overlay {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.lasso-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Force graph canvas styling */
+.graph-container canvas {
+  display: block;
+  background: #ffffff;
+}
+
+/* 3D graph specific styles */
+.graph-container .scene-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* 2D graph specific styles */
+.graph-container .force-graph-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Graph interaction states */
+.graph-container.lasso-mode {
+  cursor: crosshair;
+}
+
+.graph-container.lasso-mode canvas {
+  pointer-events: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .graph-container {
+    min-height: 400px;
+  }
+  
+  .loading-state {
+    padding: 2rem;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .graph-container {
+    min-height: 300px;
+  }
+  
+  .loading-state p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .graph-container {
+    background: white;
+    box-shadow: none;
+  }
+  
+  .lasso-overlay {
+    display: none;
+  }
+}
