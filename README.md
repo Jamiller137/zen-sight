@@ -12,25 +12,27 @@ A (work in progress) simplicial complex visualization python package made with R
 
 ![splitting-ezgif com-resize](https://github.com/user-attachments/assets/9ce47297-88a0-481b-813c-34d04a61cfdd)
 
-- **Graph Operations**: Node cutting and splitting.
+- **Graph Operations**: Node cutting and duplication.
 - **Timeline Replay**: Replay and review graph operations with the timeline
 
 ![timeline-ezgif com-resize](https://github.com/user-attachments/assets/8d89e439-5d39-4757-9294-316523b1a959)
-
 
 - **Integration**: Built-in adapters for NetworkX and Zen Mapper
 
 ---
 
 ## Installation
+
 ```python
 pip install zen-sight
 ```
 
---- 
+---
 
 ## Quick(ish) Start
+
 Creating Simplicial Complexes
+
 ```python
 from zen_sight import Sight
 
@@ -116,7 +118,9 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
 #### Zen Mapper Integration
+
 ```python
 import zen_mapper as zm
 from zen_sight.adapters import vis_zen_mapper
@@ -148,10 +152,9 @@ if __name__ == "__main__":
     main()
 ```
 
+## The `Sight` Class:
 
-## The ```Sight``` Class:
-
-Currently, zen-sight comes with a ```Sight``` Class which acts as the main interface for creating customized visualizations. Sight() comes with a .show() method which will create the app routes and initialize the visualization on port 5050. This is hard-coded currently and needs to be updated...
+Currently, zen-sight comes with a `Sight` Class which acts as the main interface for creating customized visualizations. Sight() comes with a .show() method which will create the app routes and initialize the visualization on port 5050. This is hard-coded currently and needs to be updated...
 
 Here is a breakdown of the datastructure for Sight()
 
@@ -182,11 +185,13 @@ graph TD
     style E1 fill:#1a1f2e,stroke:#ffa94d,stroke-width:2px,color:#f8f9fa
     style F1 fill:#1a1f2e,stroke:#74c0fc,stroke-width:2px,color:#f8f9fa
 ```
+
 - Note: Currently faces is a List[Tuple] made up of 3-tuples of nodes incident with the face
 
 ### Customization
 
 ### API Table:
+
 Zen Sight partially acts as a wrapper for [react-force-graph-3D](https://github.com/vasturiano/react-force-graph#api-reference). Here is an incomplete table of relevant variables/parameters:
 
 | Property              | Type               | Default                    | Description                            | Category         |
@@ -213,7 +218,6 @@ Zen Sight partially acts as a wrapper for [react-force-graph-3D](https://github.
 | **linkCurvature**     | number/func        | 0                          | Link curvature (0=straight, 1=full)    | Link Styling     |
 | **linkCurveRotation** | number/func        | 0                          | Link curve rotation in radians         | Link Styling     |
 
-
 # Future Work
 
 - Patch Bugs, Finalize API, & Organize
@@ -221,11 +225,8 @@ Zen Sight partially acts as a wrapper for [react-force-graph-3D](https://github.
 - Implement more adapters (e.g. GHUDI Simplex Trees)
 - Include 3-Simplices and allow for simplex collapses
 - Include more customization options for faces/tetrahedra
-- Implement better splitting functionality
+- Implement splitting functionality
 - Create a Filtration Visualizer
   - Backend can already do this with a bit of work
 - Create a Figure-Generation Mode for export
 - Could port Zen Sight to also work in VR
-
-
-

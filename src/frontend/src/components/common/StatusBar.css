@@ -1,0 +1,33 @@
+.status-bar {
+  border-bottom: 1px solid #ffeaa7;
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-bar--info {
+  background: #fff3cd;
+}
+
+.status-bar--warning {
+  background: #ffeaa7;
+}
+
+.status-bar--error {
+  background: #f8d7da;
+}
+
+.status-message {
+  color: #856404;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.status-bar--warning .status-message {
+  color: #664d03;
+}
+
+.status-bar--error .status-message {
+  color: #721c24;
+}
