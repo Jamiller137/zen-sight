@@ -53,7 +53,7 @@
       devShells.${system}.default =
         let
           allDevPackages = with pkgs; [
-            python3
+            python313
             nodejs
             nodePackages.npm
             pyright
@@ -91,6 +91,9 @@
 
             export SHELL="$(command -v zsh)"
             echo "DEBUG: SHELL set to $SHELL"
+
+            export UV_PYTHON="$(command -v python3.13)"
+            echo "UV_PYTHON set to $UV_PYTHON"
 
             uv sync --group dev
             source .venv/bin/activate

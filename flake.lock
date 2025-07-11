@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1749401433,
-        "narHash": "sha256-HXIQzULIG/MEUW2Q/Ss47oE3QrjxvpUX7gUl4Xp6lnc=",
+        "lastModified": 1751949589,
+        "narHash": "sha256-mgFxAPLWw0Kq+C8P3dRrZrOYEQXOtKuYVlo9xvPntt8=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "08fcb0dcb59df0344652b38ea6326a2d8271baff",
+        "rev": "9b008d60392981ad674e04016d25619281550a9d",
         "type": "github"
       },
       "original": {
@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1748925372,
-        "narHash": "sha256-adsWR87g1osZpUTLBuhK6ZK3qSVPeXpAmo7rwsZ+OZQ=",
+        "lastModified": 1750378861,
+        "narHash": "sha256-EBt0pYf0+HirjbnhR89IGs3nkF5r/o3pCHEgiW3V9P4=",
         "owner": "zen-mapper",
         "repo": "zen-mapper",
-        "rev": "5417dd7cad34d60b2fc33350168c4c34cecf73a0",
+        "rev": "54648f0cef8b561e01bfb0bfd40da19f297abf6b",
         "type": "github"
       },
       "original": {

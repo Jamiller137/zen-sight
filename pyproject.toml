@@ -43,4 +43,9 @@ where = ["src"]
 "*" = ["*.txt", "*.md"]
 zen_sight = ["static/**/*"]
 
+[tool.hatch.envs.default]
+dependencies = [
+  "uv",
+]
+
 
