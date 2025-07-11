@@ -69,7 +69,7 @@ function App() {
     handleOverlayMouseUp,
   } = useLasso(selectionMode, graphType, graphData, setSelectedNodes, graphRef);
 
-  const { cutSelectedNodes, dupSelectedNodes } = useGraphOperations(
+  const { cutSelectedNodes, dupSelectedNodes } = useGraphOperations({
     graphData,
     setGraphData,
     selectedNodes,
@@ -81,7 +81,7 @@ function App() {
     saveOperation,
     selectedCutColor,
     selectedDupColor,
-  );
+  });
 
   const handleReplayToOperation = async (operationIndex) => {
     try {
