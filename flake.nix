@@ -52,7 +52,7 @@
 
       devShells.${system}.default =
         let
-          devTools = with pkgs; [
+          allDevPackages = with pkgs; [
             python3
             nodejs
             nodePackages.npm
@@ -64,9 +64,14 @@
             ruff
             zen-mapper.packages.${system}.default
             self.formatter.${system}
+            zsh
+            ncurses
+            gnumake
           ];
         in
         pkgs.mkShell {
+          shell = "${pkgs.zsh}/bin/zsh";
+
           NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
             pkgs.stdenv.cc.cc
             pkgs.libz
@@ -74,16 +79,32 @@
 
           LC_ALL = "en_US.UTF-8";
 
-          buildInputs = devTools;
+          buildInputs = allDevPackages;
 
           shellHook = ''
-            if [ -z ''${NIX_LD+x} ]
-            then
+            echo "DEBUG: Entering zen-sight devShell..."
+
+            if [ -z "''${NIX_LD+x}" ]; then
               export LD_LIBRARY_PATH="$NIX_LD_LIBRARY_PATH"
+              echo "DEBUG: LD_LIBRARY_PATH set to $LD_LIBRARY_PATH"
             fi
+
+            export SHELL="$(command -v zsh)"
+            echo "DEBUG: SHELL set to $SHELL"
+
             uv sync --group dev
             source .venv/bin/activate
-            export PATH="${pkgs.lib.makeBinPath devTools}:$PATH"
+            echo "DEBUG: Python venv activated."
+
+            export HISTFILE="$HOME/.zsh_history"
+            if [ -f "$HISTFILE" ]; then
+              history -r
+              echo "DEBUG: History loaded from $HISTFILE"
+            else
+              echo "DEBUG: No existing history file at $HISTFILE, starting fresh."
+            fi
+
+            echo "DEBUG: shellHook complete."
           '';
         };
 
