@@ -25,24 +25,24 @@ function App() {
     setGraphData,
     graphConfig,
     graphType,
+    toggleGraphType,
     loading,
     showFaces,
+    toggleFaces,
     forceGraphKey,
     setForceGraphKey,
-    toggleGraphType,
-    toggleFaces,
   } = useGraphData();
 
   const {
     selectedNodes,
+    setSelectedNodes,
     selectedFaces,
+    setSelectedFaces,
     selectionMode,
     setSelectionMode,
     clearSelections,
     handleNodeClick,
     handleFaceClick,
-    setSelectedNodes,
-    setSelectedFaces,
   } = useSelection();
 
   const {
