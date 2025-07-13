@@ -6,12 +6,9 @@ import numpy as np
 
 def circle(n_points=1000, R=2.0, noise_level=0.00):
     theta = 2 * np.pi * np.random.uniform(0, 1, n_points)
-
     R_noisy = R + noise_level * np.random.randn(n_points)
-
     x = R_noisy * np.cos(theta)
     y = R_noisy * np.sin(theta)
-
     torus = np.column_stack((x, y))
     return torus
 
@@ -27,10 +24,10 @@ def main():
         projection=projection,
         cover_scheme=coverer,
         clusterer=clusterer,
-        dim=2,
+        dim=1,
     )
 
-    vis_zen_mapper(result)
+    vis_zen_mapper(result, data=data, projection=projection)
 
 
 if __name__ == "__main__":

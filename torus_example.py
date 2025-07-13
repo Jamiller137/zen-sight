@@ -4,7 +4,7 @@ from sklearn.cluster import DBSCAN
 import numpy as np
 
 
-def create_torus(n_points=1000, R=2.0, r=1.0, noise_level=0.00):
+def create_torus(n_points=10000, R=2.0, r=1.0, noise_level=0.00):
     theta = 2 * np.pi * np.random.uniform(0, 1, n_points)
     phi = 2 * np.pi * np.random.uniform(0, 1, n_points)
 
@@ -33,7 +33,7 @@ def main():
         dim=2,
     )
 
-    vis_zen_mapper(result)
+    vis_zen_mapper(result, data=data, projection=projection)
 
 
 if __name__ == "__main__":
