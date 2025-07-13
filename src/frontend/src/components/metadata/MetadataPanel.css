@@ -7,7 +7,7 @@
   top: 70px;
   right: 0;
   height: calc(100vh - 70px);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
   color: white;
   box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -152,7 +152,7 @@
 
 /* Array values */
 .metadata-array .metadata-value {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.8rem;
   max-width: 70%;
 }
@@ -168,7 +168,7 @@
 
 .metadata-code pre {
   margin: 0;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.75rem;
   color: #f8f9fa;
   white-space: pre-wrap;
@@ -310,7 +310,7 @@
   margin: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-family: "Monaco", "Consolas", "Courier New", monospace;
   font-size: 12px;
   line-height: 1.4;
   color: #333;
@@ -360,15 +360,15 @@
     right: 0;
     border-radius: 0;
   }
-  
+
   .metadata-panel.collapsed {
     width: 40px;
   }
-  
+
   .metadata-content {
     padding: 0.5rem;
   }
-  
+
   .metadata-section {
     padding: 0.75rem;
     margin-bottom: 1rem;
@@ -379,7 +379,7 @@
     max-height: 90vh;
     margin: 10px;
   }
-  
+
   .data-points-container {
     max-height: 50vh;
   }

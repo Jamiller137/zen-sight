@@ -35,7 +35,7 @@ const Header = ({
 
       <div className="header-right">
         <button onClick={onToggleTimeline} className="btn btn--default">
-          Timeline
+          {showTimeline ? "Hide" : "Show"} Timeline
         </button>
         <button onClick={onToggleMetadata} className="btn btn--default">
           {showMetadata ? "Hide" : "Show"} Metadata
