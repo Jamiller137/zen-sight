@@ -9,6 +9,7 @@ class Sight:
         links: Optional[List[Dict]] = None,
         faces: Optional[List[Dict]] = None,
         config: Optional[Dict] = None,
+        metadata: Optional[Dict] = None,
     ):
         """
         Initialize Sight visualization
@@ -18,6 +19,7 @@ class Sight:
             nodes: List of node dictionaries with 'id' field
             links: List of link dictionaries with 'source' and 'target' fields
             config: Configuration dictionary for ForceGraph
+            metadata: Additional metadata to store with the visualization
 
         Notes:
             See documentation for react-force-graph for more information
@@ -30,6 +32,7 @@ class Sight:
         self.links = links or []
         self.faces = faces or []
         self.config = config or {}
+        self.metadata = metadata or {}
 
     def set_nodes(self, nodes: List[Dict]) -> "Sight":
         """Set graph nodes"""
@@ -53,6 +56,11 @@ class Sight:
         self.config.update(config)
         return self
 
+    def set_metadata(self, metadata: Dict[str, Any]) -> "Sight":
+        """Set metadata (merges with existing)"""
+        self.metadata.update(metadata)
+        return self
+
     def set_graph_type(self, graph_type: str) -> "Sight":
         """Switch between 2D and 3D"""
         if graph_type not in ["2D", "3D"]:
@@ -70,6 +78,7 @@ class Sight:
                 "faces": self.faces,
             },
             "config": self.config,
+            "metadata": self.metadata,
         }
 
     def show(self, port: int = 5050):
