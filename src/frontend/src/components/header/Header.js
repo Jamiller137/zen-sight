@@ -1,6 +1,6 @@
 import React from "react";
 import ViewControls from "./ViewControls";
-import "./Header.js";
+import "./Header.css";
 
 const Header = ({
   graphType,
@@ -8,10 +8,12 @@ const Header = ({
   showFaces,
   selectionMode,
   showTimeline,
+  showMetadata,
   onToggleGraphType,
   onToggleFaces,
   onSelectionModeChange,
   onToggleTimeline,
+  onToggleMetadata,
 }) => {
   return (
     <header className="App-header">
@@ -34,6 +36,9 @@ const Header = ({
       <div className="header-right">
         <button onClick={onToggleTimeline} className="btn btn--default">
           Timeline
+        </button>
+        <button onClick={onToggleMetadata} className="btn btn--default">
+          {showMetadata ? "Hide" : "Show"} Metadata
         </button>
       </div>
     </header>

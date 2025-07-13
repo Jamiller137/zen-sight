@@ -8,6 +8,7 @@ export const useGraphData = () => {
     faces: [],
   });
   const [graphConfig, setGraphConfig] = useState({});
+  const [metadata, setMetadata] = useState({});
   const [graphType, setGraphType] = useState("3D");
   const [loading, setLoading] = useState(true);
   const [showFaces, setShowFaces] = useState(true);
@@ -16,11 +17,17 @@ export const useGraphData = () => {
   const fetchGraphData = useCallback(async () => {
     try {
       const response = await graphAPI.getGraphData();
-      const { graphType: type, data, config } = response.data;
+      const {
+        graphType: type,
+        data,
+        config,
+        metadata: responseMetadata,
+      } = response.data;
 
       setGraphType(type);
       setGraphData(data);
       setGraphConfig(config);
+      setMetadata(responseMetadata || {});
       setLoading(false);
     } catch (error) {
       console.error("Error fetching graph data:", error);
@@ -46,6 +53,7 @@ export const useGraphData = () => {
     graphData,
     setGraphData,
     graphConfig,
+    metadata,
     graphType,
     loading,
     showFaces,

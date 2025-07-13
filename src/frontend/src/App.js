@@ -4,6 +4,7 @@ import SelectionToolbar from "./components/selection/SelectionToolbar";
 import GraphContainer from "./components/graph/GraphContainer";
 import Timeline from "./components/timeline/Timeline";
 import StatusBar from "./components/common/StatusBar";
+import MetadataPanel from "./components/metadata/MetadataPanel";
 
 import { useGraphData } from "./hooks/useGraphData";
 import { useSelection } from "./hooks/useSelection";
@@ -15,8 +16,10 @@ import "./styles/App.css";
 
 function App() {
   const [showTimeline, setShowTimeline] = useState(false);
+  const [showMetadata, setShowMetadata] = useState(true);
   const [selectedCutColor, setSelectedCutColor] = useState("#ff6969");
   const [selectedDupColor, setSelectedDupColor] = useState("#69ff69");
+  const [selectedLink, setSelectedLink] = useState(null);
 
   const graphRef = useRef();
 
@@ -31,6 +34,7 @@ function App() {
     toggleFaces,
     forceGraphKey,
     setForceGraphKey,
+    metadata,
   } = useGraphData();
 
   const {
@@ -42,7 +46,6 @@ function App() {
     setSelectionMode,
     clearSelections,
     handleNodeClick,
-    handleFaceClick,
   } = useSelection();
 
   const {
@@ -106,10 +109,12 @@ function App() {
         showFaces={showFaces}
         selectionMode={selectionMode}
         showTimeline={showTimeline}
+        showMetadata={showMetadata}
         onToggleGraphType={toggleGraphType}
         onToggleFaces={toggleFaces}
         onSelectionModeChange={setSelectionMode}
         onToggleTimeline={() => setShowTimeline(!showTimeline)}
+        onToggleMetadata={() => setShowMetadata(!showMetadata)}
       />
 
       {isLassoMode && <StatusBar message="Click and drag to select nodes" />}
@@ -153,12 +158,20 @@ function App() {
           forceGraphKey={forceGraphKey}
           isReplayingOperation={isReplayingOperation}
           onNodeClick={handleNodeClick}
-          onFaceClick={handleFaceClick}
           onLassoMouseDown={handleOverlayMouseDown}
           onLassoMouseMove={handleOverlayMouseMove}
           onLassoMouseUp={handleOverlayMouseUp}
         />
       </div>
+
+      <MetadataPanel
+        graphData={graphData}
+        metadata={metadata || {}}
+        selectedNodes={selectedNodes}
+        selectedFaces={selectedFaces}
+        selectedLink={selectedLink}
+        isVisible={showMetadata}
+      />
     </div>
   );
 }

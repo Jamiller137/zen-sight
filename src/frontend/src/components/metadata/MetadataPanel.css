@@ -1,0 +1,405 @@
+/* ==========================================================================
+   Metadata Panel
+   ========================================================================== */
+
+.metadata-panel {
+  position: fixed;
+  top: 70px;
+  right: 0;
+  height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border-radius: 8px 0 0 8px;
+  overflow: hidden;
+}
+
+.metadata-panel.collapsed {
+  width: 50px;
+}
+
+.metadata-panel.expanded {
+  width: 400px;
+}
+
+/* Header */
+.metadata-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+.metadata-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.metadata-panel.collapsed .metadata-header h3 {
+  display: none;
+}
+
+/* Content */
+.metadata-content {
+  padding: 1rem;
+  overflow-y: auto;
+  height: calc(100% - 70px);
+}
+
+/* Sections */
+.metadata-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+
+.metadata-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f8f9fa;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+.metadata-subsection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metadata-subsection h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e9ecef;
+}
+
+/* Special section styling */
+.selected-nodes-section {
+  border-left: 3px solid #007bff;
+  padding-left: 12px;
+}
+
+.selected-faces-section {
+  border-left: 3px solid #28a745;
+  padding-left: 12px;
+}
+
+/* ==========================================================================
+   Data Display
+   ========================================================================== */
+
+/* Grid layout */
+.metadata-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.metadata-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metadata-item:last-child {
+  border-bottom: none;
+}
+
+.metadata-label {
+  font-weight: 500;
+  color: #f8f9fa;
+  flex: 1;
+}
+
+.metadata-value {
+  font-weight: 600;
+  color: #ffffff;
+  text-align: right;
+  max-width: 50%;
+  word-break: break-word;
+}
+
+/* List layout */
+.metadata-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.metadata-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metadata-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Array values */
+.metadata-array .metadata-value {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  max-width: 70%;
+}
+
+/* Code blocks */
+.metadata-code {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  overflow-x: auto;
+}
+
+.metadata-code pre {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #f8f9fa;
+  white-space: pre-wrap;
+}
+
+/* Color indicators */
+.node-color-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  vertical-align: middle;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn--panel-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  min-width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn--panel-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.btn--link {
+  background: none;
+  border: none;
+  color: #87ceeb;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  transition: color 0.2s ease;
+}
+
+.btn--link:hover {
+  color: #b0e0e6;
+}
+
+.btn--close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.btn--close:hover {
+  background-color: #f0f0f0;
+}
+
+/* ==========================================================================
+   Modal
+   ========================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100; /* Higher than metadata panel */
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 80vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow: auto;
+  flex: 1;
+}
+
+.data-points-container {
+  max-height: 60vh;
+  overflow: auto;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.data-points-container pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+}
+
+/* ==========================================================================
+   Scrollbars
+   ========================================================================== */
+
+.metadata-content::-webkit-scrollbar,
+.data-points-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.metadata-content::-webkit-scrollbar-track,
+.data-points-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.metadata-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.data-points-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+.metadata-content::-webkit-scrollbar-thumb:hover,
+.data-points-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.data-points-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .metadata-panel.expanded {
+    width: 100vw;
+    right: 0;
+    border-radius: 0;
+  }
+  
+  .metadata-panel.collapsed {
+    width: 40px;
+  }
+  
+  .metadata-content {
+    padding: 0.5rem;
+  }
+  
+  .metadata-section {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .modal-content {
+    max-width: 95vw;
+    max-height: 90vh;
+    margin: 10px;
+  }
+  
+  .data-points-container {
+    max-height: 50vh;
+  }
+
+  .modal-header,
+  .modal-body {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metadata-header {
+    padding: 0.75rem;
+  }
+
+  .metadata-content {
+    padding: 0.25rem;
+  }
+
+  .metadata-section {
+    padding: 0.5rem;
+  }
+}
