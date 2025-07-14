@@ -4,7 +4,6 @@ import "./SelectionToolbar.css";
 
 const SelectionToolbar = ({
   selectedNodes,
-  selectedFaces,
   selectedCutColor,
   selectedDupColor,
   onCutColorChange,
@@ -13,7 +12,7 @@ const SelectionToolbar = ({
   onDupNodes,
   onClearSelections,
 }) => {
-  if (selectedNodes.size === 0 && selectedFaces.size === 0) {
+  if (selectedNodes.size === 0) {
     return null;
   }
 
@@ -21,7 +20,6 @@ const SelectionToolbar = ({
     <div className="selection-toolbar">
       <div className="selection-info">
         {selectedNodes.size > 0 && <span>{selectedNodes.size} nodes</span>}
-        {selectedFaces.size > 0 && <span>{selectedFaces.size} faces</span>}
       </div>
 
       {selectedNodes.size > 0 && (

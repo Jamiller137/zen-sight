@@ -6,7 +6,6 @@ export const useCutNodes = ({
   setGraphData,
   selectedNodes,
   setSelectedNodes,
-  setSelectedFaces,
   setAffectedNodes,
   setCutOperations,
   saveOperation,
@@ -69,7 +68,6 @@ export const useCutNodes = ({
     });
 
     setSelectedNodes(new Set());
-    setSelectedFaces(new Set());
 
     setTimeout(
       () =>
@@ -87,7 +85,6 @@ export const useCutNodes = ({
     setGraphData,
     setAffectedNodes,
     setSelectedNodes,
-    setSelectedFaces,
     saveOperation,
     selectedCutColor,
   ]);

@@ -7,7 +7,6 @@ export const useFaceRendering = (
   showFaces,
   graphData,
   graphConfig,
-  selectedFaces,
   isReplayingOperation,
 ) => {
   const faceMeshesRef = useRef([]);
@@ -31,30 +30,26 @@ export const useFaceRendering = (
           .filter((pos) => pos);
 
         if (positions.length === 3) {
-          const isSelected = selectedFaces.has(face.id);
-
           ctx.beginPath();
           ctx.moveTo(positions[0].x, positions[0].y);
           ctx.lineTo(positions[1].x, positions[1].y);
           ctx.lineTo(positions[2].x, positions[2].y);
           ctx.closePath();
 
-          ctx.fillStyle = isSelected
-            ? graphConfig.selectedFaceFillColor || "rgba(255, 107, 107, 0.4)"
-            : graphConfig.faceFillColor || "rgba(100, 150, 250, 0.2)";
+          ctx.fillStyle =
+            graphConfig.faceFillColor || "rgba(100, 150, 250, 0.2)";
           ctx.fill();
 
-          ctx.strokeStyle = isSelected
-            ? graphConfig.selectedFaceStrokeColor || "rgba(255, 107, 107, 0.8)"
-            : graphConfig.faceStrokeColor || "rgba(100, 150, 250, 0.5)";
-          ctx.lineWidth = isSelected ? 2 : graphConfig.faceStrokeWidth || 1;
+          ctx.strokeStyle =
+            graphConfig.faceStrokeColor || "rgba(100, 150, 250, 0.5)";
+          ctx.lineWidth = graphConfig.faceStrokeWidth || 1;
           ctx.stroke();
         }
       });
 
       ctx.restore();
     },
-    [showFaces, graphData, graphConfig, selectedFaces],
+    [showFaces, graphData, graphConfig],
   );
 
   const cleanupFaces3D = useCallback(() => {
@@ -117,15 +112,9 @@ export const useFaceRendering = (
         .filter((pos) => pos);
 
       if (positions.length === 3) {
-        const isSelected = selectedFaces.has(face.id);
-
         const material = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(
-            isSelected
-              ? graphConfig.selectedFaceFillColor || "#ff6b6b"
-              : graphConfig.faceFillColor || "#6496fa",
-          ),
-          opacity: isSelected ? 0.6 : graphConfig.faceOpacity || 0.3,
+          color: new THREE.Color(graphConfig.faceFillColor || "#6496fa"),
+          opacity: graphConfig.faceOpacity || 0.3,
           transparent: true,
           side: THREE.DoubleSide,
           depthWrite: false,
@@ -156,14 +145,7 @@ export const useFaceRendering = (
         faceMeshesRef.current.push(mesh);
       }
     });
-  }, [
-    showFaces,
-    graphData,
-    graphConfig,
-    graphType,
-    selectedFaces,
-    isReplayingOperation,
-  ]);
+  }, [showFaces, graphData, graphConfig, graphType, isReplayingOperation]);
 
   const handle3DEngineTick = useCallback(() => {
     if (!graphRef.current || isReplayingOperation) return;

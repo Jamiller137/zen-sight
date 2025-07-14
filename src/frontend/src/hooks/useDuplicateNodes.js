@@ -6,7 +6,6 @@ export const useDuplicateNodes = ({
   setGraphData,
   selectedNodes,
   setSelectedNodes,
-  setSelectedFaces,
   setAffectedNodes,
   setDupOperations,
   saveOperation,
@@ -119,7 +118,6 @@ export const useDuplicateNodes = ({
     setGraphData,
     setAffectedNodes,
     setSelectedNodes,
-    setSelectedFaces,
     saveOperation,
     selectedDupColor,
   ]);

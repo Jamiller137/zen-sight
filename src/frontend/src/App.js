@@ -19,8 +19,6 @@ function App() {
   const [showMetadata, setShowMetadata] = useState(true);
   const [selectedCutColor, setSelectedCutColor] = useState("#ff6969");
   const [selectedDupColor, setSelectedDupColor] = useState("#69ff69");
-  const [selectedLink, setSelectedLink] = useState(null);
-
   const graphRef = useRef();
 
   const {
@@ -40,8 +38,6 @@ function App() {
   const {
     selectedNodes,
     setSelectedNodes,
-    selectedFaces,
-    setSelectedFaces,
     selectionMode,
     setSelectionMode,
     clearSelections,
@@ -53,7 +49,6 @@ function App() {
     setCutOperations,
     dupOperations,
     setDupOperations,
-    affectedNodes,
     setAffectedNodes,
     operationsHistory,
     currentOperationIndex,
@@ -66,7 +61,6 @@ function App() {
     isLassoMode,
     lassoPath,
     isDrawing,
-    handleLassoSelection,
     handleOverlayMouseDown,
     handleOverlayMouseMove,
     handleOverlayMouseUp,
@@ -77,7 +71,6 @@ function App() {
     setGraphData,
     selectedNodes,
     setSelectedNodes,
-    setSelectedFaces,
     setAffectedNodes,
     setCutOperations,
     setDupOperations,
@@ -121,7 +114,6 @@ function App() {
 
       <SelectionToolbar
         selectedNodes={selectedNodes}
-        selectedFaces={selectedFaces}
         selectedCutColor={selectedCutColor}
         selectedDupColor={selectedDupColor}
         onCutColorChange={setSelectedCutColor}
@@ -149,7 +141,6 @@ function App() {
           loading={loading}
           showFaces={showFaces}
           selectedNodes={selectedNodes}
-          selectedFaces={selectedFaces}
           cutOperations={cutOperations}
           dupOperations={dupOperations}
           isLassoMode={isLassoMode}
@@ -168,8 +159,6 @@ function App() {
         graphData={graphData}
         metadata={metadata || {}}
         selectedNodes={selectedNodes}
-        selectedFaces={selectedFaces}
-        selectedLink={selectedLink}
         isVisible={showMetadata}
       />
     </div>

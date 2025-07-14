@@ -20,7 +20,6 @@ const GraphContainer = forwardRef(
       loading,
       showFaces,
       selectedNodes,
-      selectedFaces,
       cutOperations,
       dupOperations,
       isLassoMode,
@@ -52,7 +51,6 @@ const GraphContainer = forwardRef(
         showFaces,
         graphData,
         graphConfig,
-        selectedFaces,
         isReplayingOperation,
       );
 
