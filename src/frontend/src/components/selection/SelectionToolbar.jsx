@@ -1,5 +1,5 @@
 import React from "react";
-import ActionControls from "./ActionControls";
+import ActionControls from "./ActionControls.jsx";
 import "./SelectionToolbar.css";
 
 const SelectionToolbar = ({

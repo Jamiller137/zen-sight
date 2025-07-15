@@ -1,5 +1,5 @@
 import React from "react";
-import ViewControls from "./ViewControls";
+import ViewControls from "./ViewControls.jsx";
 import "./Header.css";
 
 const Header = ({

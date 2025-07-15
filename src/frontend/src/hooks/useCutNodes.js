@@ -8,7 +8,6 @@ export const useCutNodes = ({
   setSelectedNodes,
   setAffectedNodes,
   setCutOperations,
-  saveOperation,
   selectedCutColor,
 }) => {
   const cutSelectedNodes = useCallback(async () => {
@@ -69,15 +68,15 @@ export const useCutNodes = ({
 
     setSelectedNodes(new Set());
 
-    setTimeout(
-      () =>
-        saveOperation("cut_nodes", `Cut ${selectedNodeIds.length} nodes`, {
-          nodeIds: selectedNodeIds,
-          cutColor: selectedCutColor,
-          affectedNodeIds: Array.from(newAffectedNodes),
-        }),
-      500,
-    );
+    return {
+      type: "cut_nodes",
+      description: `Cut ${selectedNodeIds.length} nodes`,
+      data: {
+        nodeIds: selectedNodeIds,
+        cutColor: selectedCutColor,
+        affectedNodeIds: Array.from(newAffectedNodes),
+      },
+    };
   }, [
     selectedNodes,
     graphData,
@@ -85,7 +84,6 @@ export const useCutNodes = ({
     setGraphData,
     setAffectedNodes,
     setSelectedNodes,
-    saveOperation,
     selectedCutColor,
   ]);
 

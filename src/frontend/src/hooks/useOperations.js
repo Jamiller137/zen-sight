@@ -55,15 +55,12 @@ export const useOperations = () => {
 
       setCurrentOperationIndex(operationIndex);
 
-      setTimeout(() => {
-        setIsReplayingOperation(false);
-      }, 60);
-
       return replayedGraph;
     } catch (error) {
       console.error("Error replaying to operation:", error);
-      setIsReplayingOperation(false);
       throw error;
+    } finally {
+      setIsReplayingOperation(false);
     }
   }, []);
 

@@ -54,8 +54,6 @@ export const useLasso = (
   const handleLassoSelection = useCallback(() => {
     if (lassoPath.length < 3 || graphType !== "3D") return;
 
-    console.log("Performing lasso selection with", lassoPath.length, "points");
-
     const newSelectedNodes = new Set();
 
     graphData.nodes.forEach((node) => {
@@ -68,7 +66,6 @@ export const useLasso = (
       }
     });
 
-    console.log("Selected nodes:", newSelectedNodes.size);
     setSelectedNodes(newSelectedNodes);
     setLassoPath([]);
     setIsDrawing(false);
@@ -91,7 +88,6 @@ export const useLasso = (
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
-      console.log("Starting lasso at:", x, y);
       setIsDrawing(true);
       setLassoPath([{ x, y }]);
     },
@@ -121,7 +117,6 @@ export const useLasso = (
       event.preventDefault();
       event.stopPropagation();
 
-      console.log("Ending lasso selection");
       setIsDrawing(false);
       // Call handleLassoSelection after a small delay to ensure the path is complete
       setTimeout(() => handleLassoSelection(), 50);

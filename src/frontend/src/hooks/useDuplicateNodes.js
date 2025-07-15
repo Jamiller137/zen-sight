@@ -8,7 +8,6 @@ export const useDuplicateNodes = ({
   setSelectedNodes,
   setAffectedNodes,
   setDupOperations,
-  saveOperation,
   selectedDupColor,
 }) => {
   const dupSelectedNodes = useCallback(async () => {
@@ -95,22 +94,17 @@ export const useDuplicateNodes = ({
     });
 
     setSelectedNodes(new Set());
-    setSelectedFaces(new Set());
 
-    setTimeout(
-      () =>
-        saveOperation(
-          "duplicate_nodes",
-          `Duplicated ${selectedNodeIds.length} nodes`,
-          {
-            originalNodeIds: selectedNodeIds,
-            duplicatedNodeIds: duplicatedNodeIds,
-            dupColor: selectedDupColor,
-            affectedNodeIds: [...selectedNodeIds, ...duplicatedNodeIds],
-          },
-        ),
-      500,
-    );
+    return {
+      type: "duplicate_nodes",
+      description: `Duplicated ${selectedNodeIds.length} nodes`,
+      data: {
+        originalNodeIds: selectedNodeIds,
+        duplicatedNodeIds: duplicatedNodeIds,
+        dupColor: selectedDupColor,
+        affectedNodeIds: [...selectedNodeIds, ...duplicatedNodeIds],
+      },
+    };
   }, [
     selectedNodes,
     graphData,
@@ -118,7 +112,6 @@ export const useDuplicateNodes = ({
     setGraphData,
     setAffectedNodes,
     setSelectedNodes,
-    saveOperation,
     selectedDupColor,
   ]);
 

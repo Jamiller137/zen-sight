@@ -1,5 +1,5 @@
 import React from "react";
-import ColorPicker from "./ColorPicker";
+import ColorPicker from "./ColorPicker.jsx";
 import { PREDEFINED_COLORS } from "../../utils/constants";
 
 const ActionControls = ({
