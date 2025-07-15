@@ -105,3 +105,61 @@ export const createDuplicateLinks = (
 
   return newLinks;
 };
+
+export const createDuplicateFaces = (
+  graphData,
+  selectedNodes,
+  nodeIdMapping,
+) => {
+  // If there are no faces
+  if (!graphData.faces || graphData.faces.length === 0) {
+    return [];
+  }
+
+  const newFaces = [];
+
+  graphData.faces.forEach((originalFace) => {
+    // Always keep the original face
+    newFaces.push(originalFace);
+
+    // Check if this face contains any selected nodes
+    const selectedNodesInFace = originalFace.nodes.filter((nodeId) =>
+      selectedNodes.has(nodeId),
+    );
+
+    if (selectedNodesInFace.length === 0) {
+      return;
+    }
+
+    // 1: All nodes in the face were selected - create a fully duplicated face
+    if (selectedNodesInFace.length === originalFace.nodes.length) {
+      const duplicatedFace = {
+        ...originalFace,
+        id: `${originalFace.id || "face"}_duplicate_${Date.now()}`,
+        nodes: originalFace.nodes.map((nodeId) => nodeIdMapping.get(nodeId)),
+      };
+      newFaces.push(duplicatedFace);
+    }
+    // 2: Some nodes in the face were selected: create mixed faces
+    else {
+      // For each selected node in the face, create a new face that includes its
+      // duplicated version along with the original non-selected nodes
+      selectedNodesInFace.forEach((selectedNodeId) => {
+        const duplicatedNodeId = nodeIdMapping.get(selectedNodeId);
+        if (duplicatedNodeId) {
+          const newFaceNodes = originalFace.nodes.map((nodeId) =>
+            nodeId === selectedNodeId ? duplicatedNodeId : nodeId,
+          );
+
+          newFaces.push({
+            ...originalFace,
+            id: `${originalFace.id || "face"}_partial_duplicate_${selectedNodeId}_${Date.now()}`,
+            nodes: newFaceNodes,
+          });
+        }
+      });
+    }
+  });
+
+  return newFaces;
+};

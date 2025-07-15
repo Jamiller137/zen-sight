@@ -124,13 +124,20 @@ def vis_zen_mapper(
 
             links.append(link_data)
 
-        # Process faces - only handle triangular faces (3 vertices)
-        for face in result.nerve[2]:
-            face_vertices = [int(v) for v in face]
+        # Process faces - create face objects with id and nodes properties
+        for face_idx, face in enumerate(result.nerve[2]):
+            face_vertices = [
+                str(v) for v in face
+            ]  # Convert to strings to match node IDs
 
-            # Only add triangular faces as tuples
             if len(face_vertices) == 3:
-                faces.append(tuple(face_vertices))
+                face_data = {
+                    "id": f"face_{face_idx}",
+                    "nodes": face_vertices,
+                    "type": "triangle",
+                    "mapperFace": [int(v) for v in face],
+                }
+                faces.append(face_data)
 
     except Exception as e:
         print(f"Error processing mapper data: {e}")
@@ -148,11 +155,17 @@ def vis_zen_mapper(
                     "target": str(edge[1]),
                 }
             )
-        # Fallback: only add triangular faces
-        for face in result.nerve[2]:
-            face_vertices = [int(v) for v in face]
+        # Fallback
+        for face_idx, face in enumerate(result.nerve[2]):
+            face_vertices = [str(v) for v in face]
             if len(face_vertices) == 3:
-                faces.append(tuple(face_vertices))
+                face_data = {
+                    "id": f"face_{face_idx}",
+                    "nodes": face_vertices,
+                    "type": "triangle",
+                    "mapperFace": [int(v) for v in face],
+                }
+                faces.append(face_data)
 
     sight = Sight()
 

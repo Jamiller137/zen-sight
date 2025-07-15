@@ -182,9 +182,11 @@ def create_app(sight_instance):
                 if i < len(duplicated_node_ids):
                     node_id_mapping[original_id] = duplicated_node_ids[i]
 
+            # Color original nodes
             for original_id in original_node_ids:
                 affected_nodes_colors[original_id] = duplicate_color
 
+            # Create duplicate nodes
             for original_id in original_node_ids:
                 original_node = next(
                     (node for node in graph_data["nodes"] if node["id"] == original_id),
@@ -245,7 +247,12 @@ def create_app(sight_instance):
                     node_id in original_node_ids for node_id in face["nodes"]
                 )
 
+                # If face contains selected nodes, create a duplicate face
                 if has_selected_node:
+                    new_face = json.loads(json.dumps(face))  # Deep copy
+                    new_face["id"] = f"{face['id']}_duplicate_{str(uuid.uuid4())[:8]}"
+
+                    # Replace selected nodes with duplicates
                     new_face_nodes = []
                     for node_id in face["nodes"]:
                         if node_id in original_node_ids and node_id in node_id_mapping:
@@ -253,24 +260,16 @@ def create_app(sight_instance):
                         else:
                             new_face_nodes.append(node_id)
 
-                    new_face = json.loads(json.dumps(face))
-                    new_face["id"] = f"{face['id']}_duplicate_{len(new_faces)}"
                     new_face["nodes"] = new_face_nodes
                     new_faces.append(new_face)
 
+            # Add the new faces
             graph_data["faces"].extend(new_faces)
 
-            # apply colors to affected nodes
+            # Apply colors
             for node in graph_data["nodes"]:
                 if node["id"] in affected_nodes_colors:
                     node["color"] = affected_nodes_colors[node["id"]]
-
-        elif operation["type"] == "toggle_graph_type":
-            pass
-
-        for node in graph_data["nodes"]:
-            if node["id"] in affected_nodes_colors:
-                node["color"] = affected_nodes_colors[node["id"]]
 
         return graph_data, affected_nodes_colors
 

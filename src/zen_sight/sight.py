@@ -44,11 +44,25 @@ class Sight:
         self.links = links
         return self
 
-    def set_faces(self, faces: List[Tuple[Any, Any, Any]]) -> "Sight":
-        """A face is a triple of nodeIds"""
-        self.faces = [
-            {"nodes": list(f), "id": f"face-{i}"} for i, f in enumerate(faces)
-        ]
+    def set_faces(self, faces: List) -> "Sight":
+        """Set faces - handles both tuples and dictionaries"""
+        processed_faces = []
+
+        for i, f in enumerate(faces):
+            if isinstance(f, dict):
+                # If it's already a dictionary with the correct structure, use it
+                if "nodes" in f and "id" in f:
+                    processed_faces.append(f)
+                else:
+                    # If it's a dictionary but missing required fields, convert
+                    processed_faces.append(
+                        {"nodes": f.get("nodes", []), "id": f.get("id", f"face-{i}")}
+                    )
+            else:
+                # If it's a tuple/list, convert to dictionary
+                processed_faces.append({"nodes": list(f), "id": f"face-{i}"})
+
+        self.faces = processed_faces
         return self
 
     def set_config(self, config: Dict[str, Any]) -> "Sight":

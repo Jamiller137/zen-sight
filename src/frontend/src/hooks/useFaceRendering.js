@@ -24,7 +24,12 @@ export const useFaceRendering = (
         }
       });
 
-      graphData.faces.forEach((face) => {
+      graphData.faces.forEach((face, index) => {
+        if (!face.nodes || !Array.isArray(face.nodes)) {
+          console.warn(`Face ${index} has invalid nodes property:`, face.nodes);
+          return;
+        }
+
         const positions = face.nodes
           .map((nodeId) => nodeMap[nodeId])
           .filter((pos) => pos);
@@ -44,6 +49,10 @@ export const useFaceRendering = (
             graphConfig.faceStrokeColor || "rgba(100, 150, 250, 0.5)";
           ctx.lineWidth = graphConfig.faceStrokeWidth || 1;
           ctx.stroke();
+        } else {
+          console.warn(
+            `Face ${index} has ${positions.length} valid positions, expected 3`,
+          );
         }
       });
 
@@ -106,10 +115,39 @@ export const useFaceRendering = (
       };
     });
 
-    graphData.faces.forEach((face) => {
+    console.log("3D Face rendering debug:", {
+      facesCount: graphData.faces.length,
+      nodesCount: graphData.nodes.length,
+      nodeMapSize: Object.keys(nodeMap).length,
+      sampleFace: graphData.faces[0],
+      sampleNode: graphData.nodes[0],
+    });
+
+    graphData.faces.forEach((face, index) => {
+      // Debug each face
+      console.log(`3D Face ${index}:`, {
+        face,
+        faceNodes: face.nodes,
+        nodeExists: face.nodes?.map((nodeId) => ({
+          nodeId,
+          exists: nodeMap[nodeId] !== undefined,
+          position: nodeMap[nodeId],
+        })),
+      });
+
+      if (!face.nodes || !Array.isArray(face.nodes)) {
+        console.warn(
+          `3D Face ${index} has invalid nodes property:`,
+          face.nodes,
+        );
+        return;
+      }
+
       const positions = face.nodes
         .map((nodeId) => nodeMap[nodeId])
         .filter((pos) => pos);
+
+      console.log(`3D Face ${index} positions:`, positions);
 
       if (positions.length === 3) {
         const material = new THREE.MeshBasicMaterial({
@@ -143,8 +181,17 @@ export const useFaceRendering = (
         mesh.userData = { isFace: true, faceId: face.id };
         scene.add(mesh);
         faceMeshesRef.current.push(mesh);
+        console.log(`Successfully created mesh for face ${index}`);
+      } else {
+        console.warn(
+          `3D Face ${index} has ${positions.length} valid positions, expected 3`,
+        );
       }
     });
+
+    console.log(
+      `Total 3D face meshes created: ${faceMeshesRef.current.length}`,
+    );
   }, [showFaces, graphData, graphConfig, graphType, isReplayingOperation]);
 
   const handle3DEngineTick = useCallback(() => {

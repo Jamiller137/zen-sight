@@ -1,5 +1,9 @@
 import { useCallback } from "react";
-import { createDuplicateNode, createDuplicateLinks } from "../utils/graphUtils";
+import {
+  createDuplicateNode,
+  createDuplicateLinks,
+  createDuplicateFaces,
+} from "../utils/graphUtils";
 
 export const useDuplicateNodes = ({
   graphData,
@@ -48,25 +52,13 @@ export const useDuplicateNodes = ({
       nodeIdMapping,
     );
 
-    // Create duplicate faces
-    const newFaces = [...(graphData.faces || [])];
-    graphData.faces?.forEach((face) => {
-      const hasSelectedNode = face.nodes.some((nodeId) =>
-        selectedNodes.has(nodeId),
-      );
-
-      if (hasSelectedNode) {
-        const newFaceNodes = face.nodes.map((nodeId) =>
-          selectedNodes.has(nodeId) ? nodeIdMapping.get(nodeId) : nodeId,
-        );
-
-        newFaces.push({
-          ...face,
-          id: `${face.id}_duplicate_${timestamp}`,
-          nodes: newFaceNodes,
-        });
-      }
-    });
+    // Create duplicate faces using the utility function
+    const newFaces = createDuplicateFaces(
+      graphData,
+      selectedNodes,
+      nodeIdMapping,
+      timestamp,
+    );
 
     const dupOperation = {
       id: timestamp,
