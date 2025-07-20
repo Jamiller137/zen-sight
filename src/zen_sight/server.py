@@ -47,7 +47,7 @@ def create_app(sight_instance):
                 "id": str(uuid.uuid4()),
                 "timestamp": datetime.now().isoformat(),
                 "type": "original",
-                "description": "Original graph state",
+                "description": "Original State",
                 "data": {
                     "nodeCount": len(initial_graph_data["nodes"]),
                     "linkCount": len(initial_graph_data["links"]),
